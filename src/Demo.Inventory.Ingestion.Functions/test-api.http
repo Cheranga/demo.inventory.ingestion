@@ -1,0 +1,7 @@
+POST http://localhost:7071/api/inventory
+Content-Type: application/json
+
+{
+  "correlationId": "666",
+  "fileName": "blah.csv"
+}
