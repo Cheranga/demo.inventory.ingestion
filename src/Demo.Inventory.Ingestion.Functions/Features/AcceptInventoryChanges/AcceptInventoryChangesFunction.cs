@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
+using System.Web.Http;
 using Demo.Inventory.Ingestion.Functions.Extensions;
+using LanguageExt;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +29,15 @@ public class AcceptInventoryChangesFunction
     )
     {
         var addOrderRequest = await request.ToModelAsync<AcceptInventoryChangeRequest>();
-        await _mediator.Send(addOrderRequest);
-        return new AcceptedResult();
+        var operation = await _mediator.Send(addOrderRequest);
+        return ToResponse(operation);
+    }
+
+    private static IActionResult ToResponse(Fin<bool> operation)
+    {
+        return operation.Match<IActionResult>(
+            status => status ? new AcceptedResult() : new BadRequestResult(),
+            _ => new InternalServerErrorResult()
+        );
     }
 }

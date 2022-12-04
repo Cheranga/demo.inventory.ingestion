@@ -4,16 +4,16 @@ using Demo.Inventory.Ingestion.Functions.Extensions;
 using Demo.Inventory.Ingestion.Functions.Infrastructure.Messaging;
 using FluentValidation;
 using LanguageExt;
+using LanguageExt.Common;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using static LanguageExt.Prelude;
 
 namespace Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
 
 public record AcceptInventoryChangeRequest(string FileName)
     : BaseMediatorRequest<
             AcceptInventoryChangeRequest,
-            Fin<bool>,
+            bool,
             AcceptInventoryChangeRequest.Validator
         >,
         IRequest<Fin<bool>>,
@@ -58,35 +58,59 @@ public record AcceptInventoryChangeRequestHandler
     public async Task<Fin<bool>> Handle(
         AcceptInventoryChangeRequest request,
         CancellationToken cancellationToken
-    ) =>
-    (
-        await (
-            from validationResult in _validator.ValidateAff(request, _logger, cancellationToken)
-            from operation in _messagePublisher.PublishAsync(
-                _settings.Category,
-                _settings.Queue,
-                request.ToJson,
-                MessageSettings.DefaultSettings
-            )
-            select operation
-        ).Run()
-    ).Match(
-        x =>
-        {
-            _logger.LogInformation(
-                "{CorrelationId} successfully accepted inventory change request {@Request}",
-                request.CorrelationId,
-                request
-            );
-            return FinSucc(true);
-        },
-        error =>
-        {
-            _logger.LogError(
-                "{CorrelationId} error occurred when processing the inventory change request",
-                request.CorrelationId
-            );
-            return FinFail<bool>(error);
-        }
-    );
+    )
+    {
+        from vr in _validator.ValidateAff(request, cancellationToken)
+                .MapFail(err => ErrorCodes.BadInputData(err.ToException()))
+            from op in _messagePublisher.PublishAsync(_settings.Category, _settings.Queue, request.ToJson, MessageSettings.DefaultSettings)
+
+        // var validationResult = await _validator.ValidateAsync(request, cancellationToken);
+        // if (!validationResult.IsValid)
+        // {
+        //     return FinFail<bool>(
+        //         Error.New(ErrorCodes.BadInventoryChangeData, ErrorMessages.BadInventoryChangeData)
+        //     );
+        // }
+        //
+        // return (
+        //     await _messagePublisher
+        //         .PublishAsync(
+        //             _settings.Category,
+        //             _settings.Queue,
+        //             request.ToJson,
+        //             MessageSettings.DefaultSettings
+        //         )
+        //         .Run()
+        // ).Match(_ => FinSucc(true), err => err);
+    }
+    // (
+    //     await (
+    //         from validationResult in Aff(async()=> await _validator.ValidateAsync(request, cancellationToken))//_validator.ValidateAff(request, _logger, cancellationToken)
+    //         from a in validationResult.IsValid? FinFail<bool>(Error.New("")) : _messagePublisher.PublishAsync(
+    //             _settings.Category,
+    //             _settings.Queue,
+    //             request.ToJson,
+    //             MessageSettings.DefaultSettings
+    //         )
+    //         select operation
+    //     ).Run()
+    // ).Match(
+    //     x =>
+    //     {
+    //         _logger.LogInformation(
+    //             "{CorrelationId} successfully accepted inventory change request {@Request}",
+    //             request.CorrelationId,
+    //             request
+    //         );
+    //         return FinSucc(true);
+    //     },
+    //     error =>
+    //     {
+    //         _logger.LogError(
+    //             "{CorrelationId} error occurred when processing the inventory change request",
+    //             request.CorrelationId
+    //         );
+    //         return FinFail<bool>(error);
+    //     }
+    // );
 }

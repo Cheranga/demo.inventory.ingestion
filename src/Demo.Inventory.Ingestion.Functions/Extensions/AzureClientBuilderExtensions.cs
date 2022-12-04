@@ -10,21 +10,21 @@ public static class AzureClientBuilderExtensions
         this IAzureClientBuilder<TClient, TOptions> builder
     ) where TOptions : class
     {
-        return builder.WithCredential(
-            _ =>
-                new DefaultAzureCredential(
-                    new DefaultAzureCredentialOptions
-                    {
-                        ExcludeManagedIdentityCredential = false,
-                        ExcludeEnvironmentCredential = true,
-                        ExcludeAzureCliCredential = true,
-                        ExcludeInteractiveBrowserCredential = true,
-                        ExcludeVisualStudioCredential = true,
-                        ExcludeAzurePowerShellCredential = true,
-                        ExcludeSharedTokenCacheCredential = true,
-                        ExcludeVisualStudioCodeCredential = true
-                    }
-                )
-        );
+        return builder.WithCredential(new ManagedIdentityCredential());
+        //     _ =>
+        //         new DefaultAzureCredential(
+        //             new DefaultAzureCredentialOptions
+        //             {
+        //                 ExcludeManagedIdentityCredential = false,
+        //                 ExcludeEnvironmentCredential = true,
+        //                 ExcludeAzureCliCredential = true,
+        //                 ExcludeInteractiveBrowserCredential = true,
+        //                 ExcludeVisualStudioCredential = true,
+        //                 ExcludeAzurePowerShellCredential = true,
+        //                 ExcludeSharedTokenCacheCredential = true,
+        //                 ExcludeVisualStudioCodeCredential = true
+        //             }
+        //         )
+        // );
     }
 }
