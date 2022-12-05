@@ -1,5 +1,6 @@
 ﻿using System;
 using LanguageExt;
+
 namespace Demo.Inventory.Ingestion.Functions.Infrastructure.Messaging;
 
 public interface IMessagePublisher

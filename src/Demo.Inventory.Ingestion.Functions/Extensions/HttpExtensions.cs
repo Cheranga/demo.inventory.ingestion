@@ -15,10 +15,7 @@ public static class HttpExtensions
     {
         // TODO: return better type
         var content = await request.ReadAsStringAsync();
-        if (string.IsNullOrEmpty(content))
-        {
-            return default;
-        }
+        if (string.IsNullOrEmpty(content)) return default;
 
         return JsonConvert.DeserializeObject<TModel>(content, SerializerSettings);
     }

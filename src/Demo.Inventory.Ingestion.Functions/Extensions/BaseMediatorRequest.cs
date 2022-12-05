@@ -1,5 +1,4 @@
 using FluentValidation;
-using LanguageExt;
 using MediatR;
 
 namespace Demo.Inventory.Ingestion.Functions.Extensions;

@@ -26,19 +26,13 @@ public static class FunctionHostBuilderExtensions
         {
             var queueBuilder = clientBuilder
                 .AddQueueServiceClient(account)
-                .ConfigureOptions(options =>
-                {
-                    options.MessageEncoding = QueueMessageEncoding.Base64;
-                })
+                .ConfigureOptions(options => { options.MessageEncoding = QueueMessageEncoding.Base64; })
                 .WithName(name);
 
-            if (!builder.IsNonProd())
-            {
-                queueBuilder.WithManagedIdentity();
-            }
+            if (!builder.IsNonProd()) queueBuilder.WithManagedIdentity();
         });
     }
-    
+
     public static void RegisterBlobServiceClient(
         this IFunctionsHostBuilder builder,
         string account,
@@ -51,10 +45,7 @@ public static class FunctionHostBuilderExtensions
                 .AddBlobServiceClient(account)
                 .WithName(name);
 
-            if (!builder.IsNonProd())
-            {
-                queueBuilder.WithManagedIdentity();
-            }
+            if (!builder.IsNonProd()) queueBuilder.WithManagedIdentity();
         });
     }
 }

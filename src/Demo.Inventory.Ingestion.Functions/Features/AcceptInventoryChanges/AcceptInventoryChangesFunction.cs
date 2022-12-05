@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Demo.Inventory.Ingestion.Functions.Extensions;
@@ -9,7 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Extensions.Logging;
+using Unit = LanguageExt.Unit;
 
 namespace Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
 
@@ -17,10 +16,7 @@ public class AcceptInventoryChangesFunction
 {
     private readonly IMediator _mediator;
 
-    public AcceptInventoryChangesFunction(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    public AcceptInventoryChangesFunction(IMediator mediator) => _mediator = mediator;
 
     [FunctionName(nameof(AcceptInventoryChangesFunction))]
     public async Task<IActionResult> RunAsync(
@@ -33,11 +29,16 @@ public class AcceptInventoryChangesFunction
         return ToResponse(operation);
     }
 
-    private static IActionResult ToResponse(Fin<bool> operation)
+    private static IActionResult ToResponse(Fin<Unit> operation)
     {
         return operation.Match<IActionResult>(
-            status => status ? new AcceptedResult() : new BadRequestResult(),
-            _ => new InternalServerErrorResult()
+            _ => new AcceptedResult(),
+            error =>
+                error.Code switch
+                {
+                    ErrorCodes.InvalidData => new BadRequestResult(),
+                    _ => new InternalServerErrorResult()
+                }
         );
     }
 }
