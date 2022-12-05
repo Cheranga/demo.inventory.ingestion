@@ -1,4 +1,5 @@
-﻿using Demo.Inventory.Ingestion.Functions.Extensions;
+﻿using Demo.Inventory.Ingestion.Functions.Core;
+using Demo.Inventory.Ingestion.Functions.Extensions;
 using FluentValidation;
 using LanguageExt;
 using MediatR;
@@ -6,18 +7,16 @@ using Unit = LanguageExt.Unit;
 
 namespace Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
 
-public record Blah(string CorrelationId, string FileName) : ITrackable;
-
 public record AcceptInventoryChangeRequest(string CorrelationId, string FileName)
     : BaseMediatorRequest<
         AcceptInventoryChangeRequest,
-        Fin<Unit>,
+        Either<ErrorResponse, Unit>,
         AcceptInventoryChangeRequest.Validator
     >,
         ITrackable,
-        IRequest<Fin<Unit>>
+        IRequest<Either<ErrorResponse, Unit>>
 {
-    public class Validator : AbstractValidator<AcceptInventoryChangeRequest>
+    public class Validator : BaseModelValidator<AcceptInventoryChangeRequest>
     {
         public Validator()
         {

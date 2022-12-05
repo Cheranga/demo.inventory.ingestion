@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
+using Demo.Inventory.Ingestion.Functions.Core;
 using Demo.Inventory.Ingestion.Functions.Extensions;
 using LanguageExt;
 using MediatR;
@@ -21,7 +22,7 @@ public class AcceptInventoryChangesFunction
     [FunctionName(nameof(AcceptInventoryChangesFunction))]
     public async Task<IActionResult> RunAsync(
         [HttpTrigger(AuthorizationLevel.Function, WebRequestMethods.Http.Post, Route = "inventory")]
-        HttpRequest request
+            HttpRequest request
     )
     {
         var addOrderRequest = await request.ToModelAsync<AcceptInventoryChangeRequest>();
@@ -29,14 +30,14 @@ public class AcceptInventoryChangesFunction
         return ToResponse(operation);
     }
 
-    private static IActionResult ToResponse(Fin<Unit> operation)
+    private static IActionResult ToResponse(Either<ErrorResponse, Unit> operation)
     {
         return operation.Match<IActionResult>(
             _ => new AcceptedResult(),
-            error =>
-                error.Code switch
+            error => 
+                error.ErrorCode switch
                 {
-                    ErrorCodes.InvalidData => new BadRequestResult(),
+                    ErrorCodes.InvalidData => new BadRequestObjectResult(error),
                     _ => new InternalServerErrorResult()
                 }
         );

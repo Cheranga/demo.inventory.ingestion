@@ -60,8 +60,8 @@ public static class AzureStorageQueueSchema
             .MapFail(
                 error =>
                     Error.New(
-                        ErrorCodes.UnableToPublishWithDefaultMessageSettings,
-                        ErrorMessages.UnableToPublishWithDefaultMessageSettings,
+                        ErrorCodes.UnableToPublishWithProvidedMessageSettings,
+                        ErrorMessages.UnableToPublishWithProvidedMessageSettings,
                         error.ToException()
                     )
             )

@@ -1,16 +1,17 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Demo.Inventory.Ingestion.Functions.Core;
 using Demo.Inventory.Ingestion.Functions.Extensions;
 using Demo.Inventory.Ingestion.Functions.Infrastructure.Messaging;
 using FluentValidation;
 using LanguageExt;
-using LanguageExt.Common;
 using Microsoft.Extensions.Logging;
+using static LanguageExt.Prelude;
 
 namespace Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
 
 public record AcceptInventoryChangeRequestHandler
-    : MediatR.IRequestHandler<AcceptInventoryChangeRequest, Fin<Unit>>
+    : MediatR.IRequestHandler<AcceptInventoryChangeRequest, Either<ErrorResponse, Unit>>
 {
     private readonly ILogger<AcceptInventoryChangeRequestHandler> _logger;
     private readonly IMessagePublisher _messagePublisher;
@@ -30,32 +31,22 @@ public record AcceptInventoryChangeRequestHandler
         _logger = logger;
     }
 
-    public async Task<Fin<Unit>> Handle(
+    public async Task<Either<ErrorResponse, Unit>> Handle(
         AcceptInventoryChangeRequest request,
         CancellationToken cancellationToken
     )
     {
-        var validationResult = await _validator.ValidateAsync(request, cancellationToken);
-        if (!validationResult.IsValid)
-        {
-            _logger.LogWarning(
-                "{CorrelationId} invalid data {@Data}",
-                request.CorrelationId,
-                request
-            );
-
-            return Prelude.FinFail<Unit>(Error.New(ErrorCodes.InvalidData, ErrorMessages.InvalidData));
-        }
-
-        var result = (
-            await _messagePublisher
-                .PublishAsync(
+        return (
+            await (
+                from a in _validator.ValidateAff(request, cancellationToken)
+                from op in _messagePublisher.PublishAsync(
                     _settings.Category,
                     _settings.Queue,
                     request.ToJson,
                     MessageSettings.DefaultSettings
                 )
-                .Run()
+                select op
+            ).Run()
         ).Match(
             _ =>
             {
@@ -63,19 +54,25 @@ public record AcceptInventoryChangeRequestHandler
                     "{CorrelationId} inventory changes accepted",
                     request.CorrelationId
                 );
-                return Prelude.FinSucc(Prelude.unit);
+                return Either<ErrorResponse, Unit>.Right(unit);
             },
-            err =>
+            error =>
             {
                 _logger.LogError(
-                    err.ToException(),
-                    "{CorrelationId} accepting inventory changes failed {@Data}",
+                    "{CorrelationId}:{ErrorCode} inventory changes were not accepted",
                     request.CorrelationId,
-                    request
+                    error.Code
                 );
-                return err;
+                return Either<ErrorResponse, Unit>.Left(
+                    error.ToException() is ValidationException
+                        ? ErrorResponse.ToError(
+                            ErrorCodes.InvalidData,
+                            ErrorMessages.InvalidData,
+                            ((ValidationException)error.ToException()).Errors
+                        )
+                        : ErrorResponse.ToError(error.Code, error.Message)
+                );
             }
         );
-        return result;
     }
 }
