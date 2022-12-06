@@ -1,6 +1,4 @@
-using System;
-
-namespace Demo.Inventory.Ingestion.Functions.Infrastructure.Messaging;
+namespace Infrastructure.Messaging.Azure.Queues;
 
 public record MessageSettings
 {

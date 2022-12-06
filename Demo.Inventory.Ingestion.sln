@@ -4,6 +4,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo.Inventory.Ingestion.Fu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo.Inventory.Ingestion.Tests", "tests\Demo.Inventory.Ingestion.Tests\Demo.Inventory.Ingestion.Tests.csproj", "{307038B7-C981-4389-B6CE-DCA9E3921496}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.Messaging.Azure.Queues", "src\Infrastructure.Messaging.Azure.Queues\Infrastructure.Messaging.Azure.Queues.csproj", "{75CA3968-4AEE-48C2-9BB4-8C4C472EB467}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.Messaging.Azure.Blobs", "src\Infrastructure.Messaging.Azure.Blobs\Infrastructure.Messaging.Azure.Blobs.csproj", "{92F5E1BC-E09F-43A3-8D17-1AA2D311F9C0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{9E6876CD-9AFA-4E18-A02B-D71EDED9C61F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Ingestion", "Ingestion", "{3CC724D0-9C74-4D88-8E87-A3D8C45343D2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{12CFDEEC-7DC6-43B7-8E56-D830F7FE1286}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +28,19 @@ Global
 		{307038B7-C981-4389-B6CE-DCA9E3921496}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{307038B7-C981-4389-B6CE-DCA9E3921496}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{307038B7-C981-4389-B6CE-DCA9E3921496}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75CA3968-4AEE-48C2-9BB4-8C4C472EB467}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75CA3968-4AEE-48C2-9BB4-8C4C472EB467}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75CA3968-4AEE-48C2-9BB4-8C4C472EB467}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75CA3968-4AEE-48C2-9BB4-8C4C472EB467}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92F5E1BC-E09F-43A3-8D17-1AA2D311F9C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92F5E1BC-E09F-43A3-8D17-1AA2D311F9C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92F5E1BC-E09F-43A3-8D17-1AA2D311F9C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92F5E1BC-E09F-43A3-8D17-1AA2D311F9C0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{92F5E1BC-E09F-43A3-8D17-1AA2D311F9C0} = {9E6876CD-9AFA-4E18-A02B-D71EDED9C61F}
+		{75CA3968-4AEE-48C2-9BB4-8C4C472EB467} = {9E6876CD-9AFA-4E18-A02B-D71EDED9C61F}
+		{E6493F6F-FD50-489F-A7B0-02AFA76D314F} = {3CC724D0-9C74-4D88-8E87-A3D8C45343D2}
+		{307038B7-C981-4389-B6CE-DCA9E3921496} = {12CFDEEC-7DC6-43B7-8E56-D830F7FE1286}
 	EndGlobalSection
 EndGlobal

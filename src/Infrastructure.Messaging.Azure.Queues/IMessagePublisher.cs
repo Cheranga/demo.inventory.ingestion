@@ -1,7 +1,6 @@
-﻿using System;
-using LanguageExt;
+﻿using LanguageExt;
 
-namespace Demo.Inventory.Ingestion.Functions.Infrastructure.Messaging;
+namespace Infrastructure.Messaging.Azure.Queues;
 
 public interface IMessagePublisher
 {

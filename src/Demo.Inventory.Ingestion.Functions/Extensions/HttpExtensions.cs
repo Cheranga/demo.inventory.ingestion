@@ -7,7 +7,7 @@ namespace Demo.Inventory.Ingestion.Functions.Extensions;
 
 public static class HttpExtensions
 {
-    public static readonly JsonSerializerSettings SerializerSettings =
+    private static readonly JsonSerializerSettings SerializerSettings =
         new() { Error = (_, args) => args.ErrorContext.Handled = true };
 
     public static async Task<TModel> ToModelAsync<TModel>(this HttpRequest request)

@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Azure.Identity;
 using Azure.Storage.Queues;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Azure;
 
-namespace Demo.Inventory.Ingestion.Functions.Extensions;
+namespace Infrastructure.Messaging.Azure.Queues;
 
 public static class FunctionHostBuilderExtensions
 {
@@ -26,26 +26,16 @@ public static class FunctionHostBuilderExtensions
         {
             var queueBuilder = clientBuilder
                 .AddQueueServiceClient(account)
-                .ConfigureOptions(options => { options.MessageEncoding = QueueMessageEncoding.Base64; })
+                .ConfigureOptions(options =>
+                {
+                    options.MessageEncoding = QueueMessageEncoding.Base64;
+                })
                 .WithName(name);
 
-            if (!builder.IsNonProd()) queueBuilder.WithManagedIdentity();
-        });
-    }
-
-    public static void RegisterBlobServiceClient(
-        this IFunctionsHostBuilder builder,
-        string account,
-        string name
-    )
-    {
-        builder.Services.AddAzureClients(clientBuilder =>
-        {
-            var queueBuilder = clientBuilder
-                .AddBlobServiceClient(account)
-                .WithName(name);
-
-            if (!builder.IsNonProd()) queueBuilder.WithManagedIdentity();
+            if (!builder.IsNonProd())
+            {
+                queueBuilder.WithCredential(new ManagedIdentityCredential());
+            }
         });
     }
 }
