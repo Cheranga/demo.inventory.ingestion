@@ -1,0 +1,39 @@
+name: provisionresources
+
+on:
+  workflow_call:
+    inputs:
+      environmentName:
+        required: true
+        type: string
+      functionAppName:
+        required: true
+        type: string
+      resourceGroupName:
+        required: true
+        type: string
+      location:
+        required: true
+        type: string
+      category:
+        required: true
+        type: string
+    secrets:
+      credentials:
+        required: true
+
+jobs:
+  provisionresources:
+    name: "Create function app with related resources"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Create and deploy function app"
+        uses: Cheranga/GitHubActions/vanillafunctionapp@master
+        with:
+          credentials: ${{ secrets.credentials }}
+          deploymentName: ${{ github.run_number }}-${{ inputs.functionAppName }}
+          environmentName: ${{ inputs.environment }}
+          resourceGroupName: ${{ inputs.resourceGroupName }}
+          functionAppName: ${{ inputs.functionAppName }}
+          location: ${{ inputs.location }}
+          category: ${{ inputs.category }}

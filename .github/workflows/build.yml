@@ -29,3 +29,15 @@ jobs:
           dotnetVersion: ${{ env.DotNetVersion }}
           projectName: ${{ env.ProjectName }}
           artifactName: ${{ env.ArtifactName }}  
+  Deploy:
+    name: deploy resources
+    needs: CI
+    uses: deploy.yml    
+    with:
+      environmentName: dev
+      functionAppName: ${{ env.FunctionAppName }}
+      resourceGroupName: ${{ env.ResourceGroupName }}
+      location: ${{ env.ResourceGroupLocation }}
+      category: nonprod
+    secrets:
+      credentials: ${{ secrets.AZURE_CREDENTIALS }}
