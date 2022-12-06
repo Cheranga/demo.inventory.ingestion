@@ -1,0 +1,31 @@
+name: Demo.Inventory.Ingestion
+concurrency: demo-inventory-ingestion
+
+on:
+  push:
+    branches:
+      - main
+      - feature/**
+
+  workflow_dispatch:
+
+env:
+  DotNetVersion: 6.0.x
+  PackagePath: ./published
+  ProjectName: Demo.Inventory.Ingestion.Functions
+  FunctionAppName: ccinventorying
+  ArtifactName: funcapp
+  ResourceGroupName: rg-cc-inventory-ing-dev
+  ResourceGroupLocation: australiasoutheast
+  
+jobs:
+  CI:
+    name: build test and publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build, test and publish function app
+        uses: Cheranga/GitHubActions/restorebuildtestpublish@master
+        with:
+          dotnetVersion: ${{ env.DotNetVersion }}
+          projectName: ${{ env.ProjectName }}
+          artifactName: ${{ env.ArtifactName }}  
