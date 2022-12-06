@@ -1,9 +1,8 @@
-using System;
 using Azure.Storage.Queues;
 using LanguageExt;
 using Microsoft.Extensions.Azure;
 
-namespace Demo.Inventory.Ingestion.Functions.Infrastructure.Messaging;
+namespace Infrastructure.Messaging.Azure.Queues;
 
 public class AzureQueueStorageMessagePublisher : IMessagePublisher
 {

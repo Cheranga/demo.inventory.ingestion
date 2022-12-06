@@ -1,11 +1,10 @@
-﻿using System;
-using Azure.Storage.Queues;
+﻿using Azure.Storage.Queues;
 using LanguageExt;
 using LanguageExt.Common;
 using Microsoft.Extensions.Azure;
 using static LanguageExt.Prelude;
 
-namespace Demo.Inventory.Ingestion.Functions.Infrastructure.Messaging;
+namespace Infrastructure.Messaging.Azure.Queues;
 
 public static class AzureStorageQueueSchema
 {

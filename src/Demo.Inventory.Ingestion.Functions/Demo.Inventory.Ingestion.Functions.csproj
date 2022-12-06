@@ -24,4 +24,7 @@
     <ItemGroup>
         <Compile Remove="Extensions\BaseRequestHandler.cs" />
     </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Infrastructure.Messaging.Azure.Queues\Infrastructure.Messaging.Azure.Queues.csproj" />
+    </ItemGroup>
 </Project>

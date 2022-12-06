@@ -8,7 +8,7 @@ public class ErrorResponse
 {
     public int ErrorCode { get; set; }
     public string ErrorMessage { get; set; }
-    public List<ErrorData> Errors { get; set; } = new List<ErrorData>();
+    public List<ErrorData> Errors { get; set; } = new();
 
     public class ErrorData
     {

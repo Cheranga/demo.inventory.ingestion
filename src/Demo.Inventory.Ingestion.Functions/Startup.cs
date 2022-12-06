@@ -1,8 +1,8 @@
 ﻿using Demo.Inventory.Ingestion.Functions;
 using Demo.Inventory.Ingestion.Functions.Extensions;
 using Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
-using Demo.Inventory.Ingestion.Functions.Infrastructure.Messaging;
 using FluentValidation;
+using Infrastructure.Messaging.Azure.Queues;
 using MediatR;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Azure.WebJobs.Host.Bindings;

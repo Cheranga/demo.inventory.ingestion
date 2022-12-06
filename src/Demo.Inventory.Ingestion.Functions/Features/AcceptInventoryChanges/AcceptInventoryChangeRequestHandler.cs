@@ -2,8 +2,8 @@
 using System.Threading.Tasks;
 using Demo.Inventory.Ingestion.Functions.Core;
 using Demo.Inventory.Ingestion.Functions.Extensions;
-using Demo.Inventory.Ingestion.Functions.Infrastructure.Messaging;
 using FluentValidation;
+using Infrastructure.Messaging.Azure.Queues;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
 using static LanguageExt.Prelude;
@@ -34,18 +34,17 @@ public record AcceptInventoryChangeRequestHandler
     public async Task<Either<ErrorResponse, Unit>> Handle(
         AcceptInventoryChangeRequest request,
         CancellationToken cancellationToken
-    )
-    {
-        return (
+    ) =>
+        (
             await (
-                from a in _validator.ValidateAff(request, cancellationToken)
-                from op in _messagePublisher.PublishAsync(
+                from _ in _validator.ValidateAff(request, cancellationToken)
+                from __ in _messagePublisher.PublishAsync(
                     _settings.Category,
                     _settings.Queue,
                     request.ToJson,
                     MessageSettings.DefaultSettings
                 )
-                select op
+                select __
             ).Run()
         ).Match(
             _ =>
@@ -54,7 +53,7 @@ public record AcceptInventoryChangeRequestHandler
                     "{CorrelationId} inventory changes accepted",
                     request.CorrelationId
                 );
-                return Either<ErrorResponse, Unit>.Right(unit);
+                return Right(unit);
             },
             error =>
             {
@@ -63,7 +62,7 @@ public record AcceptInventoryChangeRequestHandler
                     request.CorrelationId,
                     error.Code
                 );
-                return Either<ErrorResponse, Unit>.Left(
+                return Left<ErrorResponse, Unit>(
                     error.ToException() is ValidationException
                         ? ErrorResponse.ToError(
                             ErrorCodes.InvalidData,
@@ -74,5 +73,4 @@ public record AcceptInventoryChangeRequestHandler
                 );
             }
         );
-    }
 }
