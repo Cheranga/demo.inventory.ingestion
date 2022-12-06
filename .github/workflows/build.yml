@@ -32,7 +32,7 @@ jobs:
   Deploy:
     name: deploy resources
     needs: CI
-    uses: deploy.yml    
+    uses: ./.github/workflows/deploy.yml    
     with:
       environmentName: dev
       functionAppName: ${{ env.FunctionAppName }}
