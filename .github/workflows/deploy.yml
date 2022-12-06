@@ -18,13 +18,16 @@ on:
       category:
         required: true
         type: string
+      queues:
+        required: false
+        type: string        
     secrets:
       credentials:
         required: true
 
 jobs:     
   provisionresources:
-    name: "Create function app with related resources"    
+    name: "Provisioning resources"    
     runs-on: ubuntu-latest
     steps:
       - name: "Create resource group"
@@ -33,13 +36,24 @@ jobs:
           credentials: ${{ secrets.credentials }}
           name: ${{ inputs.resourceGroupName }}
           location: ${{ inputs.location }}
-      - name: "Create and deploy function app"
-        uses: Cheranga/GitHubActions/vanillafunctionapp@master
+          
+      - name: Create storage queue
+        uses: Cheranga/GitHubActions/storageaccount@master
         with:
-          credentials: ${{ secrets.credentials }}
-          deploymentName: ${{ github.run_number }}-${{ inputs.functionAppName }}
-          environmentName: ${{ inputs.environment }}
+          credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          deploymentName: ${{ github.run_number }}-storage-account-updates
           resourceGroupName: ${{ inputs.resourceGroupName }}
-          functionAppName: ${{ inputs.functionAppName }}
+          name: sg${{ inputs.functionAppName }}${{ inputs.environmentName }}
           location: ${{ inputs.location }}
-          category: ${{ inputs.category }}
+          storageType: ${{ inputs.category }}
+          queues: ${{ inputs.queues }}          
+#      - name: "Create and deploy function app"
+#        uses: Cheranga/GitHubActions/vanillafunctionapp@master
+#        with:
+#          credentials: ${{ secrets.credentials }}
+#          deploymentName: ${{ github.run_number }}-${{ inputs.functionAppName }}
+#          environmentName: ${{ inputs.environment }}
+#          resourceGroupName: ${{ inputs.resourceGroupName }}
+#          functionAppName: ${{ inputs.functionAppName }}
+#          location: ${{ inputs.location }}
+#          category: ${{ inputs.category }}

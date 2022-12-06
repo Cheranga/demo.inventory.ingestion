@@ -39,5 +39,6 @@ jobs:
       resourceGroupName: rg-cc-inventory-ing-dev
       location: australiasoutheast
       category: nonprod
+      queues: inventory-changes
     secrets:
       credentials: ${{ secrets.AZURE_CREDENTIALS }}
