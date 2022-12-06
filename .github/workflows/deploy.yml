@@ -23,6 +23,17 @@ on:
         required: true
 
 jobs:
+  createResourceGroup:
+    name: Create Resource Group
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Resource Group
+        uses: Cheranga/GitHubActions/createresourcegroup@master
+        with:
+          credentials: ${{ secrets.credentials }}
+          name: ${{ inputs.resourceGroupName }}
+          location: ${{ inputs.location }}
+          
   provisionresources:
     name: "Create function app with related resources"
     runs-on: ubuntu-latest
