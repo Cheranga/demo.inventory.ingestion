@@ -36,6 +36,7 @@ jobs:
           
   provisionresources:
     name: "Create function app with related resources"
+    needs: createResourceGroup
     runs-on: ubuntu-latest
     steps:
       - name: "Create and deploy function app"
