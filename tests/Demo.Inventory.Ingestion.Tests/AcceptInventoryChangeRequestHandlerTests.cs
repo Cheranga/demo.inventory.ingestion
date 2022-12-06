@@ -201,7 +201,7 @@ public static class AcceptInventoryChangeRequestHandlerTests
                         Times.Once
                     );
 
-                    tuple.mockedLogger.VerifyUsage(LogLevel.Information, Times.Once());
+                    tuple.mockedLogger.VerifyUsage(LogLevel.Warning, Times.Once());
                 }
             );
     }
