@@ -50,12 +50,11 @@ jobs:
           
       - name: "Create and deploy function app"
         uses: Cheranga/GitHubActions/vanillafunctionapp@master
-        with:          
+        with:
+          credentials: ${{ secrets.credentials }}
           deploymentName: ${{ github.run_number }}-${{ inputs.functionAppName }}
           environmentName: ${{ inputs.environmentName }}
           resourceGroupName: ${{ inputs.resourceGroupName }}
           functionAppName: ${{ inputs.functionAppName }}
           location: ${{ inputs.location }}
-          category: ${{ inputs.category }}
-        secrets:
-          credentials: ${{ secrets.credentials }}
+          category: ${{ inputs.category }}          
