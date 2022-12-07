@@ -22,17 +22,21 @@ jobs:
   CI:
     name: build test and publish
     runs-on: ubuntu-latest
+    environment:
+      EnvironmentName: dev
+      Category: nonprod
+      Queues: inventory-changes
     steps:
-      - name: Provision Azure resources for a vanilla function app
-        uses: Cheranga/GitHubActions/vanillafunctionapp@master
+      - name: Create Storage Account Resources
+        uses: Cheranga/GitHubActions/storageaccount@master
         with:
           credentials: ${{ secrets.AZURE_CREDENTIALS }}
-          deploymentName: ${{ github.run_number }}-${{ env.FunctionAppName }}
-          environmentName: dev
+          deploymentName: ${{ github.run_number }}-storage-account-updates
           resourceGroupName: ${{ env.ResourceGroupName }}
-          functionAppName: ${{ env.FunctionAppName }}
+          name: sg${{ env.FunctionAppName }}${{ env.EnvironmentName }}
           location: ${{ env.ResourceGroupLocation }}
-          category: nonprod      
+          storageType: ${{ env.Category }}
+          queues: ${{ env.Queues }}
 #      - name: Build, test and publish function app
 #        uses: Cheranga/GitHubActions/restorebuildtestpublish@master
 #        with:
