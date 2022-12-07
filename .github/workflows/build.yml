@@ -38,23 +38,23 @@ jobs:
       Category: nonprod
       Queues: inventory-changes
     steps:
-      - name: "Create resource group"
-        uses: Cheranga/GitHubActions/createresourcegroup@master
-        with:
-          credentials: ${{ secrets.AZURE_CREDENTIALS }}
-          name: ${{ env.ResourceGroupName }}
-          location: ${{ env.ResourceGroupLocation }}
-          
-      - name: Create Storage Account Resources
-        uses: Cheranga/GitHubActions/storageaccount@master
-        with:
-          credentials: ${{ secrets.AZURE_CREDENTIALS }}
-          deploymentName: ${{ github.run_number }}-storage-account-updates
-          resourceGroupName: ${{ env.ResourceGroupName }}
-          name: sg${{ env.FunctionAppName }}${{ env.EnvironmentName }}
-          location: ${{ env.ResourceGroupLocation }}
-          storageType: ${{ env.Category }}
-          queues: ${{ env.Queues }}
+#      - name: "Create resource group"
+#        uses: Cheranga/GitHubActions/createresourcegroup@master
+#        with:
+#          credentials: ${{ secrets.AZURE_CREDENTIALS }}
+#          name: ${{ env.ResourceGroupName }}
+#          location: ${{ env.ResourceGroupLocation }}
+#          
+#      - name: Create Storage Account Resources
+#        uses: Cheranga/GitHubActions/storageaccount@master
+#        with:
+#          credentials: ${{ secrets.AZURE_CREDENTIALS }}
+#          deploymentName: ${{ github.run_number }}-storage-account-updates
+#          resourceGroupName: ${{ env.ResourceGroupName }}
+#          name: sg${{ env.FunctionAppName }}${{ env.EnvironmentName }}
+#          location: ${{ env.ResourceGroupLocation }}
+#          storageType: ${{ env.Category }}
+#          queues: ${{ env.Queues }}
           
       - name: Vanilla Function App
         uses: Cheranga/GitHubActions/vanillafunctionapp@master
