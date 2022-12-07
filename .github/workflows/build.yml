@@ -22,6 +22,17 @@ jobs:
   CI:
     name: build test and publish
     runs-on: ubuntu-latest
+    steps:
+      - name: Build, test and publish function app
+        uses: Cheranga/GitHubActions/restorebuildtestpublish@master
+        with:
+          dotnetVersion: ${{ env.DotNetVersion }}
+          projectName: ${{ env.ProjectName }}
+          artifactName: ${{ env.ArtifactName }}
+  Deploy:
+    name: Deploy
+    needs: CI
+    runs-on: ubuntu-latest
     env:
       EnvironmentName: dev
       Category: nonprod
