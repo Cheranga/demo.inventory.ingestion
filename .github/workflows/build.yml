@@ -31,19 +31,17 @@ jobs:
           artifactName: ${{ env.ArtifactName }}
           
   Deploy:
-    call-deploy:      
-      uses: ./github/workflows/deploy.yml
-      name: DEV
-      needs: CI
-      with:
-        environment: dev
-        functionAppName: inventorying
-        resourceGroupName: cc-rg-inventorying
-        location: australiasoutheast
-        category: nonprod
-        queues: inventory-changes
-      secrets:
-        credentials: ${{ secrets.AZURE_CREDENTIALS }}
+    name: DEV
+    uses: ./github/workflows/deploy.yml
+    with:
+      environment: dev
+      functionAppName: inventorying
+      resourceGroupName: cc-rg-inventorying
+      location: australiasoutheast
+      category: nonprod
+      queues: inventory-changes
+    secrets:
+      credentials: ${{ secrets.AZURE_CREDENTIALS }}
           
           
 
