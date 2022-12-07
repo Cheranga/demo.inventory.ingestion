@@ -3,7 +3,7 @@ name: provisionresources
 on:
   workflow_call:
     inputs:
-      environmentName:
+      environment:
         required: true
         type: string
       functionAppName:
@@ -30,21 +30,32 @@ jobs:
     name: "Provisioning resources"    
     runs-on: ubuntu-latest
     steps:
-      - name: "Create resource group"
-        uses: Cheranga/GitHubActions/createresourcegroup@master
+      - name: Vanilla Function App
+        uses: Cheranga/GitHubActions/vanillafunctionapp@master
         with:
           credentials: ${{ secrets.credentials }}
-          name: ${{ inputs.resourceGroupName }}
-          location: ${{ inputs.location }}
-          
-      - name: Create storage queue
-        uses: Cheranga/GitHubActions/storageaccount@master
-        with:
-          credentials: ${{ secrets.credentials }}
-          deploymentName: ${{ github.run_number }}-storage-account-updates
+          deploymentName: ${{ github.run_number }}-${{ inputs.functionAppName }}
+          environmentName: ${{ inputs.environment }}
           resourceGroupName: ${{ inputs.resourceGroupName }}
-          name: sg${{ inputs.functionAppName }}${{ inputs.environmentName }}
+          functionAppName: ${{ inputs.functionAppName }}
           location: ${{ inputs.location }}
-          storageType: ${{ inputs.category }}
-          queues: ${{ inputs.queues }}          
+          category: ${{ inputs.category }}
+          
+          #      - name: "Create resource group"
+#        uses: Cheranga/GitHubActions/createresourcegroup@master
+#        with:
+#          credentials: ${{ secrets.credentials }}
+#          name: ${{ inputs.resourceGroupName }}
+#          location: ${{ inputs.location }}
+#          
+#      - name: Create storage queue
+#        uses: Cheranga/GitHubActions/storageaccount@master
+#        with:
+#          credentials: ${{ secrets.credentials }}
+#          deploymentName: ${{ github.run_number }}-storage-account-updates
+#          resourceGroupName: ${{ inputs.resourceGroupName }}
+#          name: sg${{ inputs.functionAppName }}${{ inputs.environmentName }}
+#          location: ${{ inputs.location }}
+#          storageType: ${{ inputs.category }}
+#          queues: ${{ inputs.queues }}          
           

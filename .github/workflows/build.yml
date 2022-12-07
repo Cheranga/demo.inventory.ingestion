@@ -20,7 +20,7 @@ env:
   
 jobs:
   CI:
-    name: build test and publish
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Build, test and publish function app
@@ -30,39 +30,39 @@ jobs:
           projectName: ${{ env.ProjectName }}
           artifactName: ${{ env.ArtifactName }}
   Deploy:
-    name: Deploy
-    needs: CI
-    runs-on: ubuntu-latest
-    env:
-      EnvironmentName: dev
-      Category: nonprod
-      Queues: inventory-changes
-    steps:
-#      - name: "Create resource group"
-#        uses: Cheranga/GitHubActions/createresourcegroup@master
-#        with:
-#          credentials: ${{ secrets.AZURE_CREDENTIALS }}
-#          name: ${{ env.ResourceGroupName }}
-#          location: ${{ env.ResourceGroupLocation }}
-#          
-#      - name: Create Storage Account Resources
-#        uses: Cheranga/GitHubActions/storageaccount@master
-#        with:
-#          credentials: ${{ secrets.AZURE_CREDENTIALS }}
-#          deploymentName: ${{ github.run_number }}-storage-account-updates
-#          resourceGroupName: ${{ env.ResourceGroupName }}
-#          name: sg${{ env.FunctionAppName }}${{ env.EnvironmentName }}
-#          location: ${{ env.ResourceGroupLocation }}
-#          storageType: ${{ env.Category }}
-#          queues: ${{ env.Queues }}
+    call-deploy:
+      name: DEV
+      needs: CI
+      uses: ./github/workflows/deploy.yml
+      with:
+        environment: dev
+        functionAppName: inventorying
+        resourceGroupName: cc-rg-inventorying
+        location: australiasoutheast
+        category: nonprod
+        queues: inventory-changes
+      secrets:
+        credentials: ${{ secrets.AZURE_CREDENTIALS }}
           
-      - name: Vanilla Function App
-        uses: Cheranga/GitHubActions/vanillafunctionapp@master
-        with:
-          credentials: ${{ secrets.AZURE_CREDENTIALS }}
-          deploymentName: ${{ github.run_number }}-${{ env.FunctionAppName }}
-          environmentName: dev
-          resourceGroupName: ${{ env.ResourceGroupName }}
-          functionAppName: ${{ env.FunctionAppName }}
-          location: ${{ env.ResourceGroupLocation }}
-          category: nonprod          
+          
+
+# This was working successfully to deploy Azure resources    
+#  Deploy:
+#    name: Deploy
+#    needs: CI
+#    runs-on: ubuntu-latest
+#    env:
+#      EnvironmentName: dev
+#      Category: nonprod
+#      Queues: inventory-changes
+#    steps:          
+#      - name: Vanilla Function App
+#        uses: Cheranga/GitHubActions/vanillafunctionapp@master
+#        with:
+#          credentials: ${{ secrets.AZURE_CREDENTIALS }}
+#          deploymentName: ${{ github.run_number }}-${{ env.FunctionAppName }}
+#          environmentName: dev
+#          resourceGroupName: ${{ env.ResourceGroupName }}
+#          functionAppName: ${{ env.FunctionAppName }}
+#          location: ${{ env.ResourceGroupLocation }}
+#          category: nonprod          
