@@ -30,12 +30,12 @@ jobs:
     name: "Provisioning resources"    
     runs-on: ubuntu-latest
     steps:
-      - name: "Create resource group"
-        uses: Cheranga/GitHubActions/createresourcegroup@master
-        with:
-          credentials: ${{ secrets.credentials }}
-          name: ${{ inputs.resourceGroupName }}
-          location: ${{ inputs.location }}
+#      - name: "Create resource group"
+#        uses: Cheranga/GitHubActions/createresourcegroup@master
+#        with:
+#          credentials: ${{ secrets.credentials }}
+#          name: ${{ inputs.resourceGroupName }}
+#          location: ${{ inputs.location }}
           
 #      - name: Create storage queue
 #        uses: Cheranga/GitHubActions/storageaccount@master
