@@ -31,7 +31,9 @@ jobs:
           artifactName: ${{ env.ArtifactName }}
           
   Deploy:    
+    name: DEV
     uses: ./.github/workflows/deploy.yml
+    needs: CI
     with:
       environment: dev
       functionAppName: inventorying
