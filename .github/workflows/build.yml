@@ -27,6 +27,13 @@ jobs:
       Category: nonprod
       Queues: inventory-changes
     steps:
+      - name: "Create resource group"
+        uses: Cheranga/GitHubActions/createresourcegroup@master
+        with:
+          credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          name: ${{ env.ResourceGroupName }}
+          location: ${{ env.ResourceGroupLocation }}
+          
       - name: Create Storage Account Resources
         uses: Cheranga/GitHubActions/storageaccount@master
         with:
