@@ -22,7 +22,7 @@ jobs:
   CI:
     name: build test and publish
     runs-on: ubuntu-latest
-    environment:
+    env:
       EnvironmentName: dev
       Category: nonprod
       Queues: inventory-changes
