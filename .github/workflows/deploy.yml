@@ -30,31 +30,21 @@ jobs:
     name: "Provisioning resources"    
     runs-on: ubuntu-latest
     steps:
-#      - name: "Create resource group"
-#        uses: Cheranga/GitHubActions/createresourcegroup@master
-#        with:
-#          credentials: ${{ secrets.credentials }}
-#          name: ${{ inputs.resourceGroupName }}
-#          location: ${{ inputs.location }}
-          
-#      - name: Create storage queue
-#        uses: Cheranga/GitHubActions/storageaccount@master
-#        with:
-#          credentials: ${{ secrets.credentials }}
-#          deploymentName: ${{ github.run_number }}-storage-account-updates
-#          resourceGroupName: ${{ inputs.resourceGroupName }}
-#          name: sg${{ inputs.functionAppName }}${{ inputs.environmentName }}
-#          location: ${{ inputs.location }}
-#          storageType: ${{ inputs.category }}
-#          queues: ${{ inputs.queues }}          
-          
-      - name: "Create and deploy function app"
-        uses: Cheranga/GitHubActions/vanillafunctionapp@master
+      - name: "Create resource group"
+        uses: Cheranga/GitHubActions/createresourcegroup@master
         with:
           credentials: ${{ secrets.credentials }}
-          deploymentName: ${{ github.run_number }}-${{ inputs.functionAppName }}
-          environmentName: ${{ inputs.environmentName }}
-          resourceGroupName: ${{ inputs.resourceGroupName }}
-          functionAppName: ${{ inputs.functionAppName }}
+          name: ${{ inputs.resourceGroupName }}
           location: ${{ inputs.location }}
-          category: ${{ inputs.category }}          
+          
+      - name: Create storage queue
+        uses: Cheranga/GitHubActions/storageaccount@master
+        with:
+          credentials: ${{ secrets.credentials }}
+          deploymentName: ${{ github.run_number }}-storage-account-updates
+          resourceGroupName: ${{ inputs.resourceGroupName }}
+          name: sg${{ inputs.functionAppName }}${{ inputs.environmentName }}
+          location: ${{ inputs.location }}
+          storageType: ${{ inputs.category }}
+          queues: ${{ inputs.queues }}          
+          
