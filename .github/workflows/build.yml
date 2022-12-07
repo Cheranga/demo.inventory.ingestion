@@ -23,22 +23,32 @@ jobs:
     name: build test and publish
     runs-on: ubuntu-latest
     steps:
-      - name: Build, test and publish function app
-        uses: Cheranga/GitHubActions/restorebuildtestpublish@master
+      - name: Provision Azure resources for a vanilla function app
+        uses: Cheranga/GitHubActions/vanillafunctionapp@master
         with:
-          dotnetVersion: ${{ env.DotNetVersion }}
-          projectName: ${{ env.ProjectName }}
-          artifactName: ${{ env.ArtifactName }}  
-  Deploy:
-    name: deploy resources
-    needs: CI
-    uses: ./.github/workflows/deploy.yml    
-    with:
-      environmentName: dev
-      functionAppName: inventorying
-      resourceGroupName: cc-rg-inventorying
-      location: australiasoutheast
-      category: nonprod
-      queues: inventory-changes
-    secrets:
-      credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          deploymentName: ${{ github.run_number }}-${{ env.FunctionAppName }}
+          environmentName: dev
+          resourceGroupName: ${{ env.ResourceGroupName }}
+          functionAppName: ${{ env.FunctionAppName }}
+          location: ${{ env.ResourceGroupLocation }}
+          category: nonprod      
+#      - name: Build, test and publish function app
+#        uses: Cheranga/GitHubActions/restorebuildtestpublish@master
+#        with:
+#          dotnetVersion: ${{ env.DotNetVersion }}
+#          projectName: ${{ env.ProjectName }}
+#          artifactName: ${{ env.ArtifactName }}  
+#  Deploy:
+#    name: deploy resources
+#    needs: CI
+#    uses: ./.github/workflows/deploy.yml    
+#    with:
+#      environmentName: dev
+#      functionAppName: inventorying
+#      resourceGroupName: cc-rg-inventorying
+#      location: australiasoutheast
+#      category: nonprod
+#      queues: inventory-changes
+#    secrets:
+#      credentials: ${{ secrets.AZURE_CREDENTIALS }}
