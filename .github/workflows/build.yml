@@ -29,11 +29,12 @@ jobs:
           dotnetVersion: ${{ env.DotNetVersion }}
           projectName: ${{ env.ProjectName }}
           artifactName: ${{ env.ArtifactName }}
+          
   Deploy:
-    call-deploy:
+    call-deploy:      
+      uses: ./github/workflows/deploy.yml
       name: DEV
       needs: CI
-      uses: ./github/workflows/deploy.yml
       with:
         environment: dev
         functionAppName: inventorying
