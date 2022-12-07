@@ -15,7 +15,7 @@ env:
   ProjectName: Demo.Inventory.Ingestion.Functions
   FunctionAppName: inventorying
   ArtifactName: funcapp
-  ResourceGroupName: rg-cc-inventory-ing
+  ResourceGroupName: cc-rg-inventorying
   ResourceGroupLocation: australiasoutheast
   
 jobs:
@@ -36,7 +36,7 @@ jobs:
     with:
       environmentName: dev
       functionAppName: inventorying
-      resourceGroupName: rg-cc-inventory-ing-dev
+      resourceGroupName: cc-rg-inventorying
       location: australiasoutheast
       category: nonprod
       queues: inventory-changes
