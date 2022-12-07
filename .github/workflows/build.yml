@@ -13,9 +13,9 @@ env:
   DotNetVersion: 6.0.x
   PackagePath: ./published
   ProjectName: Demo.Inventory.Ingestion.Functions
-  FunctionAppName: ccinventorying
+  FunctionAppName: inventorying
   ArtifactName: funcapp
-  ResourceGroupName: rg-cc-inventory-ing-dev
+  ResourceGroupName: rg-cc-inventory-ing
   ResourceGroupLocation: australiasoutheast
   
 jobs:
@@ -35,7 +35,7 @@ jobs:
     uses: ./.github/workflows/deploy.yml    
     with:
       environmentName: dev
-      functionAppName: ccinventorying
+      functionAppName: inventorying
       resourceGroupName: rg-cc-inventory-ing-dev
       location: australiasoutheast
       category: nonprod
