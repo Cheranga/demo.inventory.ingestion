@@ -48,7 +48,7 @@ jobs:
           deploymentName: ${{ github.run_number }}-storage-account-updates
           resourceGroupName: ${{ inputs.resourceGroupName }}
           name: sg${{ inputs.functionAppName }}${{ inputs.environment }}
-          location: ${{env.resourceGroupLocation}}
+          location: ${{inputs.location}}
           storageType: ${{ inputs.category }}
           queues: ${{ inputs.queues }}
 
