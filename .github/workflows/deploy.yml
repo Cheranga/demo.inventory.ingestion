@@ -9,6 +9,9 @@ on:
       functionAppName:
         required: true
         type: string
+      storageName:
+        required: true
+        type: string
       resourceGroupName:
         required: true
         type: string
@@ -24,6 +27,8 @@ on:
     secrets:
       credentials:
         required: true
+      appSettings:
+        required: true
 
 jobs:     
   provisionresources:
@@ -38,10 +43,11 @@ jobs:
           environmentName: ${{ inputs.environment }}
           resourceGroupName: ${{ inputs.resourceGroupName }}
           functionAppName: ${{ inputs.functionAppName }}
+          storageName: ${{ inputs.storageName }}
           location: ${{ inputs.location }}
           category: ${{ inputs.category }}
 
-      - name: Create storage queue
+      - name: Create Queues
         uses: Cheranga/GitHubActions/storageaccount@master
         with:
           credentials: ${{secrets.credentials}}
@@ -52,7 +58,7 @@ jobs:
           storageType: ${{ inputs.category }}
           queues: ${{ inputs.queues }}
 
-      - name: Provide function app to access queue based on RBAC
+      - name: Setup RBAC to Queue
         uses: Cheranga/GitHubActions/assignrbactostorage@master
         with:
           deploymentName: ${{ github.run_number }}-assign-queue-rbac
@@ -62,6 +68,15 @@ jobs:
           accessibility: queue_read_write
           friendlyName: ${{ inputs.functionAppName }}
           functionAppName: ${{ inputs.functionAppName }}${{ inputs.environment }}
+
+      - name: Update function app settings
+        uses: Cheranga/GitHubActions/functionappsettings@master
+        with:
+          deploymentName: ${{ github.run_number }}-update-functionapp-settings
+          resourceGroupName: ${{ inputs.resourceGroupName }}
+          credentials: ${{secrets.credentials}}
+          functionAppName: ${{ inputs.functionAppName }}${{ inputs.environment }}
+          appSettings: ${{ secrets.appSettings }}          
           
           #      - name: "Create resource group"
 #        uses: Cheranga/GitHubActions/createresourcegroup@master

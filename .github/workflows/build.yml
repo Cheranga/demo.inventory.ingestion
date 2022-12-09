@@ -37,6 +37,7 @@ jobs:
     with:
       environment: dev
       functionAppName: inventorying
+      storageName: sginventorying
       resourceGroupName: cc-rg-inventorying
       location: australiasoutheast
       category: nonprod
