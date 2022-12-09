@@ -40,6 +40,28 @@ jobs:
           functionAppName: ${{ inputs.functionAppName }}
           location: ${{ inputs.location }}
           category: ${{ inputs.category }}
+
+      - name: Create storage queue
+        uses: Cheranga/GitHubActions/storageaccount@master
+        with:
+          credentials: ${{secrets.credentials}}
+          deploymentName: ${{ github.run_number }}-storage-account-updates
+          resourceGroupName: ${{ inputs.resourceGroupName }}
+          name: sg${{ inputs.functionAppName }}${{ inputs.environment }}
+          location: ${{env.resourceGroupLocation}}
+          storageType: ${{ inputs.category }}
+          queues: ${{ inputs.queues }}
+
+      - name: Provide function app to access queue based on RBAC
+        uses: Cheranga/GitHubActions/assignrbactostorage@master
+        with:
+          deploymentName: ${{ github.run_number }}-assign-queue-rbac
+          resourceGroupName: ${{ inputs.resourceGroupName }}
+          credentials: ${{secrets.credentials}}
+          storageAccountName: sg${{ inputs.functionAppName }}${{ inputs.environment }}
+          accessibility: queue_read_write
+          friendlyName: ${{ inputs.functionAppName }}
+          functionAppName: ${{ inputs.functionAppName }}${{ inputs.environment }}
           
           #      - name: "Create resource group"
 #        uses: Cheranga/GitHubActions/createresourcegroup@master
