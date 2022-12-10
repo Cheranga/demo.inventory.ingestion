@@ -27,8 +27,6 @@ on:
     secrets:
       credentials:
         required: true
-      appSettings:
-        required: true
 
 jobs:     
   provisionresources:
@@ -70,13 +68,14 @@ jobs:
           functionAppName: ${{ inputs.functionAppName }}${{ inputs.environment }}
 
       - name: Update function app settings
-        uses: Cheranga/GitHubActions/functionappsettings@master
+        uses: azure/CLI@v1
         with:
-          deploymentName: ${{ github.run_number }}-update-functionapp-settings
-          resourceGroupName: ${{ inputs.resourceGroupName }}
-          credentials: ${{secrets.credentials}}
-          functionAppName: ${{ inputs.functionAppName }}${{ inputs.environment }}
-          appSettings: ${{ secrets.appSettings }}          
+          inlineScript: |
+            #!/bin/bash            
+            az functionapp --name ${{ inputs.functionAppName }} --resource-group ${{ inputs.resourceGroupName }} --settings ^
+            "AcceptInventorySettings__Account=sg${{ inputs.functionAppName }}${{ inputs.environment }}" ^
+            "AcceptInventorySettings__Category=Inventory" ^
+            "AcceptInventorySettings__Queue=inventory-changes"
           
           #      - name: "Create resource group"
 #        uses: Cheranga/GitHubActions/createresourcegroup@master
