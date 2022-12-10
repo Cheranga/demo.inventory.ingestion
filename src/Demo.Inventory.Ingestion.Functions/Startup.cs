@@ -4,11 +4,13 @@ using Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
 using FluentValidation;
 using Infrastructure.Messaging.Azure.Queues;
 using MediatR;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Azure.WebJobs.Host.Bindings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Serilog;
 
 [assembly: FunctionsStartup(typeof(Startup))]
 
@@ -67,5 +69,18 @@ public class Startup : FunctionsStartup
     {
         var services = builder.Services;
         services.AddSingleton<IMessagePublisher, AzureQueueStorageMessagePublisher>();
+    }
+    
+    private static void RegisterLogging(IServiceCollection services)
+    {
+        services.AddLogging(builder =>
+        {
+            var logger = new LoggerConfiguration()
+                .WriteTo.ColoredConsole(outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+                .WriteTo.ApplicationInsights(TelemetryConfiguration.CreateDefault(), TelemetryConverter.Traces)
+                .CreateLogger();
+
+            builder.AddSerilog(logger);
+        });
     }
 }

@@ -1,4 +1,5 @@
 using BunsenBurner;
+using Demo.Inventory.Ingestion.Functions.Extensions;
 using Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
 using Demo.Inventory.Ingestion.Tests.Extensions;
 using FluentAssertions;
@@ -70,8 +71,10 @@ public static class AcceptInventoryChangeRequestHandlerTests
                             publisher.PublishAsync(
                                 It.IsAny<string>(),
                                 It.IsAny<string>(),
+                                It.IsAny<string>(),
                                 It.IsAny<Func<string>>(),
-                                It.IsAny<MessageSettings>()
+                                It.IsAny<MessageSettings>(),
+                                It.IsAny<ILogger>()
                             ),
                         Times.Never
                     );
@@ -85,10 +88,13 @@ public static class AcceptInventoryChangeRequestHandlerTests
         await Arrange(() =>
             {
                 var mockedPublisher = new Mock<IMessagePublisher>();
-                mockedPublisher.Setup(x => x.PublishAsync(It.IsAny<string>(),
+                mockedPublisher.Setup(x => x.PublishAsync(
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
                         It.IsAny<string>(),
                         It.IsAny<Func<string>>(),
-                        It.IsAny<MessageSettings>()))
+                        It.IsAny<MessageSettings>(),
+                        It.IsAny<ILogger>()))
                     .Returns(FailAff<Unit>(Error.New(666, "message publish error")));
                 
                 var mockedValidator = new Mock<IValidator<AcceptInventoryChangeRequest>>();
@@ -134,8 +140,10 @@ public static class AcceptInventoryChangeRequestHandlerTests
                             publisher.PublishAsync(
                                 It.IsAny<string>(),
                                 It.IsAny<string>(),
+                                It.IsAny<string>(),
                                 It.IsAny<Func<string>>(),
-                                It.IsAny<MessageSettings>()
+                                It.IsAny<MessageSettings>(),
+                                It.IsAny<ILogger>()
                             ),
                         Times.Once
                     );
@@ -151,10 +159,13 @@ public static class AcceptInventoryChangeRequestHandlerTests
         await Arrange(() =>
             {
                 var mockedPublisher = new Mock<IMessagePublisher>();
-                mockedPublisher.Setup(x => x.PublishAsync(It.IsAny<string>(),
+                mockedPublisher.Setup(x => x.PublishAsync(
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
                         It.IsAny<string>(),
                         It.IsAny<Func<string>>(),
-                        It.IsAny<MessageSettings>()))
+                        It.IsAny<MessageSettings>(),
+                        It.IsAny<ILogger>()))
                     .Returns(SuccessAff(unit));
                 
                 var mockedValidator = new Mock<IValidator<AcceptInventoryChangeRequest>>();
@@ -195,8 +206,10 @@ public static class AcceptInventoryChangeRequestHandlerTests
                             publisher.PublishAsync(
                                 It.IsAny<string>(),
                                 It.IsAny<string>(),
+                                It.IsAny<string>(),
                                 It.IsAny<Func<string>>(),
-                                It.IsAny<MessageSettings>()
+                                It.IsAny<MessageSettings>(),
+                                It.IsAny<ILogger>()
                             ),
                         Times.Once
                     );
