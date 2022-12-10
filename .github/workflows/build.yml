@@ -36,9 +36,9 @@ jobs:
     needs: CI
     with:
       environment: dev
-      functionAppName: inventorying
-      storageName: sginventorying
-      resourceGroupName: cc-rg-inventorying
+      functionAppName: inventoryingdev
+      storageName: sginventoryingdev
+      resourceGroupName: cc-rg-inventorying-dev
       location: australiasoutheast
       category: nonprod
       queues: inventory-changes

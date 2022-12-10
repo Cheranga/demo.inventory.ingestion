@@ -51,7 +51,7 @@ jobs:
           credentials: ${{secrets.credentials}}
           deploymentName: ${{ github.run_number }}-storage-account-updates
           resourceGroupName: ${{ inputs.resourceGroupName }}
-          name: sg${{ inputs.functionAppName }}${{ inputs.environment }}
+          name: ${{ inputs.storageName }}
           location: ${{inputs.location}}
           storageType: ${{ inputs.category }}
           queues: ${{ inputs.queues }}
@@ -62,17 +62,17 @@ jobs:
           deploymentName: ${{ github.run_number }}-assign-queue-rbac
           resourceGroupName: ${{ inputs.resourceGroupName }}
           credentials: ${{secrets.credentials}}
-          storageAccountName: sg${{ inputs.functionAppName }}${{ inputs.environment }}
+          storageAccountName: ${{ inputs.storageName }}
           accessibility: queue_read_write
           friendlyName: ${{ inputs.functionAppName }}
-          functionAppName: ${{ inputs.functionAppName }}${{ inputs.environment }}
+          functionAppName: ${{ inputs.functionAppName }}
 
       - name: Update function app settings
         uses: azure/CLI@v1
         with:
           inlineScript: |     
             az functionapp --name ${{ inputs.functionAppName }} --resource-group ${{ inputs.resourceGroupName }} --settings ^
-            "AcceptInventorySettings__Account=sg${{ inputs.functionAppName }}${{ inputs.environment }}" ^
+            "AcceptInventorySettings__Account=${{ inputs.storageName }}" ^
             "AcceptInventorySettings__Category=Inventory" ^
             "AcceptInventorySettings__Queue=inventory-changes"
           
