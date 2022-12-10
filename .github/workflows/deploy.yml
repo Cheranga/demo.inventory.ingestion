@@ -76,6 +76,13 @@ jobs:
             "AcceptInventorySettings__Account=${{ inputs.storageName }}" \
             "AcceptInventorySettings__Category=Inventory" \
             "AcceptInventorySettings__Queue=inventory-changes"
+
+      - name: Deploy code to function app
+        uses: Cheranga/GitHubActions/deploydotnetfunctionapp@master
+        with:
+          credentials: ${{secrets.credentials}}
+          dotnetVersion: 6.0.x
+          functionAppName: ${{ inputs.functionAppName }}
           
           #      - name: "Create resource group"
 #        uses: Cheranga/GitHubActions/createresourcegroup@master
