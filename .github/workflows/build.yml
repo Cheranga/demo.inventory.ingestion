@@ -37,6 +37,7 @@ jobs:
     with:
       environment: dev
       functionAppName: inventoryingdev
+      projectName: ${{ env.ProjectName }}
       storageName: sginventoryingdev
       resourceGroupName: cc-rg-inventorying-dev
       location: australiasoutheast

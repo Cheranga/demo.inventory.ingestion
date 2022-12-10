@@ -6,6 +6,9 @@ on:
       environment:
         required: true
         type: string
+      projectName:
+        required: true
+        type: string
       functionAppName:
         required: true
         type: string
@@ -82,6 +85,7 @@ jobs:
         with:
           credentials: ${{secrets.credentials}}
           dotnetVersion: 6.0.x
+          projectName: ${{ inputs.projectName }}
           functionAppName: ${{ inputs.functionAppName }}
           
           #      - name: "Create resource group"
