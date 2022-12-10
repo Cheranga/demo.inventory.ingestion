@@ -31,7 +31,7 @@ jobs:
           artifactName: ${{ env.ArtifactName }}
           
   Deploy:    
-    name: DEV
+    name: DEV    
     uses: ./.github/workflows/deploy.yml
     needs: CI
     with:

@@ -70,8 +70,7 @@ jobs:
       - name: Update function app settings
         uses: azure/CLI@v1
         with:
-          inlineScript: |
-            #!/bin/bash            
+          inlineScript: |     
             az functionapp --name ${{ inputs.functionAppName }} --resource-group ${{ inputs.resourceGroupName }} --settings ^
             "AcceptInventorySettings__Account=sg${{ inputs.functionAppName }}${{ inputs.environment }}" ^
             "AcceptInventorySettings__Category=Inventory" ^
