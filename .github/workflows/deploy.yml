@@ -72,9 +72,9 @@ jobs:
         with:
           inlineScript: |
             #!/bin/bash                 
-            az functionapp config appsettings set --name ${{ inputs.functionAppName }} --resource-group ${{ inputs.resourceGroupName }} --settings ^
-            "AcceptInventorySettings__Account=${{ inputs.storageName }}" ^
-            "AcceptInventorySettings__Category=Inventory" ^
+            az functionapp config appsettings set --name ${{ inputs.functionAppName }} --resource-group ${{ inputs.resourceGroupName }} --settings \
+            "AcceptInventorySettings__Account=${{ inputs.storageName }}" \
+            "AcceptInventorySettings__Category=Inventory" \
             "AcceptInventorySettings__Queue=inventory-changes"
           
           #      - name: "Create resource group"
