@@ -23,7 +23,7 @@ public static class AzureStorageQueueSchema
             })
             .MapFail(error =>
             {
-                logger.LogWarning("{CorrelationId} cannot create queue service client", correlationId);
+                logger.LogError( error.ToException(),"{CorrelationId} cannot create queue service client", correlationId);
                 return Error.New(
                     ErrorCodes.QueueServiceClientNotFound,
                     ErrorMessages.QueueServiceClientNotFound,
@@ -41,7 +41,7 @@ public static class AzureStorageQueueSchema
             .MapFail(
                 error =>
                 {
-                    logger.LogWarning("{CorrelationId} cannot get queue client", correlationId);
+                    logger.LogError( error.ToException(),"{CorrelationId} cannot get queue client", correlationId);
                     return Error.New(
                         ErrorCodes.QueueClientNotFound,
                         ErrorMessages.QueueClientNotFound,
@@ -84,7 +84,7 @@ public static class AzureStorageQueueSchema
             .MapFail(
                 error =>
                 {
-                    logger.LogWarning("{CorrelationId} error when publishing message using specific settings", correlationId);
+                    logger.LogError( error.ToException(),"{CorrelationId} error when publishing message using specific settings", correlationId);
                     return Error.New(
                         ErrorCodes.UnableToPublishWithProvidedMessageSettings,
                         ErrorMessages.UnableToPublishWithProvidedMessageSettings,
@@ -110,7 +110,7 @@ public static class AzureStorageQueueSchema
             .MapFail(
                 error =>
                 {
-                    logger.LogWarning("{CorrelationId} error when publishing message using default settings", correlationId);
+                    logger.LogError(error.ToException(),"{CorrelationId} error when publishing message using default settings", correlationId);
                     return Error.New(
                         ErrorCodes.UnableToPublishWithDefaultMessageSettings,
                         ErrorMessages.UnableToPublishWithDefaultMessageSettings,
