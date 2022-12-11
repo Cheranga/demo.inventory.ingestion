@@ -62,7 +62,7 @@ public class Startup : FunctionsStartup
             .GetSection(nameof(AcceptInventorySettings))
             .Get<AcceptInventorySettings>();
 
-        builder.RegisterQueueServiceClient(addOrderSettings.Account, addOrderSettings.Category);
+        builder.RegisterQueueServiceClient(configuration, addOrderSettings.Account, addOrderSettings.Category);
     }
 
     private static void RegisterMessaging(IFunctionsHostBuilder builder)
