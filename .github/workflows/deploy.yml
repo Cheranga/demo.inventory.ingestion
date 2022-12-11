@@ -1,0 +1,109 @@
+name: provisionresources
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      projectName:
+        required: true
+        type: string
+      functionAppName:
+        required: true
+        type: string
+      storageName:
+        required: true
+        type: string
+      resourceGroupName:
+        required: true
+        type: string
+      location:
+        required: true
+        type: string
+      category:
+        required: true
+        type: string
+      queues:
+        required: false
+        type: string        
+    secrets:
+      credentials:
+        required: true
+
+jobs:     
+  provisionresources:
+    name: "Provisioning resources"    
+    runs-on: ubuntu-latest
+    steps:
+      - name: Vanilla Function App
+        uses: Cheranga/GitHubActions/vanillafunctionapp@master
+        with:
+          credentials: ${{ secrets.credentials }}
+          deploymentName: ${{ github.run_number }}-${{ inputs.functionAppName }}
+          environmentName: ${{ inputs.environment }}
+          resourceGroupName: ${{ inputs.resourceGroupName }}
+          functionAppName: ${{ inputs.functionAppName }}
+          storageName: ${{ inputs.storageName }}
+          location: ${{ inputs.location }}
+          category: ${{ inputs.category }}
+
+      - name: Create Queues
+        uses: Cheranga/GitHubActions/storageaccount@master
+        with:
+          credentials: ${{secrets.credentials}}
+          deploymentName: ${{ github.run_number }}-storage-account-updates
+          resourceGroupName: ${{ inputs.resourceGroupName }}
+          name: ${{ inputs.storageName }}
+          location: ${{inputs.location}}
+          storageType: ${{ inputs.category }}
+          queues: ${{ inputs.queues }}
+
+      - name: Setup RBAC to Queue
+        uses: Cheranga/GitHubActions/assignrbactostorage@master
+        with:
+          deploymentName: ${{ github.run_number }}-assign-queue-rbac
+          resourceGroupName: ${{ inputs.resourceGroupName }}
+          credentials: ${{secrets.credentials}}
+          storageAccountName: ${{ inputs.storageName }}
+          accessibility: queue_read_write
+          friendlyName: ${{ inputs.functionAppName }}
+          functionAppName: ${{ inputs.functionAppName }}
+
+      - name: Update function app settings
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            #!/bin/bash                 
+            az functionapp config appsettings set --name ${{ inputs.functionAppName }} --resource-group ${{ inputs.resourceGroupName }} --settings \
+            "Environment=production" \
+            "AcceptInventorySettings__Account=${{ inputs.storageName }}" \
+            "AcceptInventorySettings__Category=Inventory" \
+            "AcceptInventorySettings__Queue=inventory-changes"
+
+      - name: Deploy code to function app
+        uses: Cheranga/GitHubActions/deploydotnetfunctionapp@master
+        with:
+          credentials: ${{secrets.credentials}}
+          dotnetVersion: 6.0.x
+          projectName: ${{ inputs.projectName }}
+          functionAppName: ${{ inputs.functionAppName }}
+          
+          #      - name: "Create resource group"
+#        uses: Cheranga/GitHubActions/createresourcegroup@master
+#        with:
+#          credentials: ${{ secrets.credentials }}
+#          name: ${{ inputs.resourceGroupName }}
+#          location: ${{ inputs.location }}
+#          
+#      - name: Create storage queue
+#        uses: Cheranga/GitHubActions/storageaccount@master
+#        with:
+#          credentials: ${{ secrets.credentials }}
+#          deploymentName: ${{ github.run_number }}-storage-account-updates
+#          resourceGroupName: ${{ inputs.resourceGroupName }}
+#          name: sg${{ inputs.functionAppName }}${{ inputs.environmentName }}
+#          location: ${{ inputs.location }}
+#          storageType: ${{ inputs.category }}
+#          queues: ${{ inputs.queues }}          
+          

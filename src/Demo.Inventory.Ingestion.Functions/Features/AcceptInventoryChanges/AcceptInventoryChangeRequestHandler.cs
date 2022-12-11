@@ -37,12 +37,14 @@ public record AcceptInventoryChangeRequestHandler
     ) =>
         (
             await (
-                from _ in _validator.ValidateAff(request, cancellationToken)
+                from _ in _validator.ValidateAff(request, _logger, cancellationToken)
                 from __ in _messagePublisher.PublishAsync(
+                    request.CorrelationId,
                     _settings.Category,
                     _settings.Queue,
                     request.ToJson,
-                    MessageSettings.DefaultSettings
+                    MessageSettings.DefaultSettings,
+                    _logger
                 )
                 select __
             ).Run()
@@ -58,6 +60,7 @@ public record AcceptInventoryChangeRequestHandler
             error =>
             {
                 _logger.LogError(
+                    error.ToException(),
                     "{CorrelationId}:{ErrorCode} inventory changes were not accepted",
                     request.CorrelationId,
                     error.Code

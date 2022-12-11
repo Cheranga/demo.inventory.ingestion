@@ -11,6 +11,11 @@
         <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage.Blobs" Version="5.0.1" />
         <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage.Queues" Version="5.0.1" />
         <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.1.1" />
+        <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
+        <PackageReference Include="Serilog.Extensions.Logging.ApplicationInsights" Version="1.1.0" />
+        <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="4.0.0" />
+        <PackageReference Include="Serilog.Sinks.ColoredConsole" Version="3.0.1" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
     </ItemGroup>
     <ItemGroup>
         <None Update="host.json">

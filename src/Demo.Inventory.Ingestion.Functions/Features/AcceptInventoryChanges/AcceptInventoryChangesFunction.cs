@@ -21,7 +21,7 @@ public class AcceptInventoryChangesFunction
 
     [FunctionName(nameof(AcceptInventoryChangesFunction))]
     public async Task<IActionResult> RunAsync(
-        [HttpTrigger(AuthorizationLevel.Function, WebRequestMethods.Http.Post, Route = "inventory")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, WebRequestMethods.Http.Post, Route = "inventory")]
             HttpRequest request
     )
     {
