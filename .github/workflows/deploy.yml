@@ -76,7 +76,7 @@ jobs:
           inlineScript: |
             #!/bin/bash                 
             az functionapp config appsettings set --name ${{ inputs.functionAppName }} --resource-group ${{ inputs.resourceGroupName }} --settings \
-            "AZURE_FUNCTIONS_ENVIRONMENT"=production" \
+            "AZURE_FUNCTIONS_ENVIRONMENT=production" \
             "AcceptInventorySettings__Account=${{ inputs.storageName }}" \
             "AcceptInventorySettings__Category=Inventory" \
             "AcceptInventorySettings__Queue=inventory-changes"
