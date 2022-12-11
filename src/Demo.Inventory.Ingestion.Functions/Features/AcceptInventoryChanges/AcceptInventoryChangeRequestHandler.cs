@@ -60,6 +60,7 @@ public record AcceptInventoryChangeRequestHandler
             error =>
             {
                 _logger.LogError(
+                    error.ToException(),
                     "{CorrelationId}:{ErrorCode} inventory changes were not accepted",
                     request.CorrelationId,
                     error.Code
