@@ -14,6 +14,6 @@ jobs:
     name: Build
     uses: ./.github/workflows/build.yml
     with:
-      projectName: Demo.Inventory.Ingestion
+      projectName: Demo.Inventory.Ingestion.Functions
       dotnetVersion: 6.0.x
       artifactName: funcapp
