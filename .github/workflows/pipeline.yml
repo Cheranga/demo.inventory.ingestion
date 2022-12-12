@@ -1,0 +1,49 @@
+name: Demo.Inventory.Ingestion
+concurrency: demo-inventory-ingestion
+
+on:
+  push:
+    branches:
+      - main
+      - feature/**
+
+  workflow_dispatch:
+
+jobs:
+  CI:
+    name: CI
+    uses: ./.github/workflows/build.yml
+    with:
+      projectName: Demo.Inventory.Ingestion.Functions
+      dotnetVersion: 6.0.x
+      artifactName: funcapp
+  DEV:
+    name: DEV
+    needs: CI
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: DEV
+      projectName: Demo.Inventory.Ingestion.Functions
+      functionAppName: inventoryingdev
+      storageName: sginventoryingdev
+      resourceGroupName: cc-rg-inventorying-dev
+      location: australiasoutheast
+      category: nonprod
+      queues: inventory-changes  
+    secrets:
+      credentials: ${{ secrets.AZURE_CREDENTIALS }}
+  QA:
+    name: QA
+    needs: DEV
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: QA
+      projectName: Demo.Inventory.Ingestion.Functions
+      functionAppName: inventoryingqa
+      storageName: sginventoryingqa
+      resourceGroupName: cc-rg-inventorying-qa
+      location: australiasoutheast
+      category: nonprod
+      queues: inventory-changes  
+    secrets:
+      credentials: ${{ secrets.AZURE_CREDENTIALS }}
