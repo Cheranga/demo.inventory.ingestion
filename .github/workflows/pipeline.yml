@@ -20,7 +20,7 @@ jobs:
   Deploy:
     name: Deploy
     needs: CI
-    environment: DEV
+    env: DEV
     uses: ./.github/workflows/deploy.yml
     with:
       environment: dev
