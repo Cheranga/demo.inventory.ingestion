@@ -34,7 +34,7 @@ jobs:
       credentials: ${{ secrets.AZURE_CREDENTIALS }}
   QA:
     name: QA
-    needs: CI
+    needs: DEV
     uses: ./.github/workflows/deploy.yml
     with:
       environment: QA
