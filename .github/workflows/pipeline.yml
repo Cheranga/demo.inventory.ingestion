@@ -36,14 +36,12 @@ jobs:
     name: QA
     needs: CI
     uses: ./.github/workflows/deploy.yml
-    environment:
-      envname: qa
     with:
       environment: QA
       projectName: Demo.Inventory.Ingestion.Functions
-      functionAppName: inventorying${{ env.envname }}
-      storageName: sginventorying${{ env.envname }}
-      resourceGroupName: cc-rg-inventorying-${{ env.envname }}
+      functionAppName: inventoryingqa
+      storageName: sginventoryingqa
+      resourceGroupName: cc-rg-inventorying-qa
       location: australiasoutheast
       category: nonprod
       queues: inventory-changes  
