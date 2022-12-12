@@ -33,7 +33,7 @@ on:
 
 jobs:     
   provisionresources:
-    name: "Provisioning resources"    
+    name: ${{ inputs.functionAppName }} 
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:

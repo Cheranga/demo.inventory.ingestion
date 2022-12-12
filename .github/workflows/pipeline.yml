@@ -11,14 +11,14 @@ on:
 
 jobs:
   CI:
-    name: Build
+    name: CI
     uses: ./.github/workflows/build.yml
     with:
       projectName: Demo.Inventory.Ingestion.Functions
       dotnetVersion: 6.0.x
       artifactName: funcapp
-  Deploy:
-    name: Deploy
+  DEV:
+    name: DEV
     needs: CI
     uses: ./.github/workflows/deploy.yml
     with:
