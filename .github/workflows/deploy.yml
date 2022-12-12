@@ -42,7 +42,6 @@ jobs:
         with:
           credentials: ${{ secrets.credentials }}
           deploymentName: ${{ github.run_number }}-${{ inputs.functionAppName }}
-          environmentName: ${{ inputs.environment }}
           resourceGroupName: ${{ inputs.resourceGroupName }}
           functionAppName: ${{ inputs.functionAppName }}
           storageName: ${{ inputs.storageName }}
@@ -89,22 +88,3 @@ jobs:
           dotnetVersion: 6.0.x
           projectName: ${{ inputs.projectName }}
           functionAppName: ${{ inputs.functionAppName }}
-          
-          #      - name: "Create resource group"
-#        uses: Cheranga/GitHubActions/createresourcegroup@master
-#        with:
-#          credentials: ${{ secrets.credentials }}
-#          name: ${{ inputs.resourceGroupName }}
-#          location: ${{ inputs.location }}
-#          
-#      - name: Create storage queue
-#        uses: Cheranga/GitHubActions/storageaccount@master
-#        with:
-#          credentials: ${{ secrets.credentials }}
-#          deploymentName: ${{ github.run_number }}-storage-account-updates
-#          resourceGroupName: ${{ inputs.resourceGroupName }}
-#          name: sg${{ inputs.functionAppName }}${{ inputs.environmentName }}
-#          location: ${{ inputs.location }}
-#          storageType: ${{ inputs.category }}
-#          queues: ${{ inputs.queues }}          
-          
