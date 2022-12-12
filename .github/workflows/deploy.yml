@@ -77,9 +77,9 @@ jobs:
             #!/bin/bash                 
             az functionapp config appsettings set --name ${{ inputs.functionAppName }} --resource-group ${{ inputs.resourceGroupName }} --settings \
             "Environment=production" \
-            "AcceptInventorySettings__Account=${{ inputs.storageName }}" \
-            "AcceptInventorySettings__Category=Inventory" \
-            "AcceptInventorySettings__Queue=inventory-changes"
+            "AcceptInventorySettings::Account=${{ inputs.storageName }}" \
+            "AcceptInventorySettings::Category=Inventory" \
+            "AcceptInventorySettings::Queue=inventory-changes"
 
       - name: Deploy code to function app
         uses: Cheranga/GitHubActions/deploydotnetfunctionapp@master

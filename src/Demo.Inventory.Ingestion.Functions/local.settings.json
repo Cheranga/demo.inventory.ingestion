@@ -1,9 +1,10 @@
 {
   "IsEncrypted": false,
   "Values": {
-    "AcceptInventorySettings__Account": "UseDevelopmentStorage=true",
-    "AcceptInventorySettings__Category": "Inventory",
-    "AcceptInventorySettings__Queue": "inventory-changes",    
+    "Environment": "Local",
+    "AcceptInventorySettings::Account": "UseDevelopmentStorage=true",
+    "AcceptInventorySettings::Category": "Inventory",
+    "AcceptInventorySettings::Queue": "inventory-changes",    
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet"
   }
