@@ -1,23 +1,18 @@
-name: Demo.Inventory.Ingestion
-concurrency: demo-inventory-ingestion
+name: Build
 
 on:
-  push:
-    branches:
-      - main
-      - feature/**
-
-  workflow_dispatch:
-
-env:
-  DotNetVersion: 6.0.x
-  PackagePath: ./published
-  ProjectName: Demo.Inventory.Ingestion.Functions
-  FunctionAppName: inventorying
-  ArtifactName: funcapp
-  ResourceGroupName: cc-rg-inventorying
-  ResourceGroupLocation: australiasoutheast
-  
+  workflow_call:
+    inputs:      
+      projectName:
+        required: true
+        type: string
+      dotnetVersion:
+        required: true
+        type: string
+      artifactName:
+        required: true
+        type: string        
+          
 jobs:
   CI:
     name: Build
@@ -26,45 +21,8 @@ jobs:
       - name: Build, test and publish function app
         uses: Cheranga/GitHubActions/restorebuildtestpublish@master
         with:
-          dotnetVersion: ${{ env.DotNetVersion }}
-          projectName: ${{ env.ProjectName }}
-          artifactName: ${{ env.ArtifactName }}
-          
-  Deploy:    
-    name: DEV    
-    uses: ./.github/workflows/deploy.yml
-    needs: CI
-    with:
-      environment: dev
-      functionAppName: inventoryingdev
-      projectName: Demo.Inventory.Ingestion.Functions
-      storageName: sginventoryingdev
-      resourceGroupName: cc-rg-inventorying-dev
-      location: australiasoutheast
-      category: nonprod
-      queues: inventory-changes
-    secrets:
-      credentials: ${{ secrets.AZURE_CREDENTIALS }}
-          
+          dotnetVersion: ${{ inputs.dotNetVersion }}
+          projectName: ${{ inputs.projectName }}
+          artifactName: ${{ inputs.artifactName }}
           
 
-# This was working successfully to deploy Azure resources    
-#  Deploy:
-#    name: Deploy
-#    needs: CI
-#    runs-on: ubuntu-latest
-#    env:
-#      EnvironmentName: dev
-#      Category: nonprod
-#      Queues: inventory-changes
-#    steps:          
-#      - name: Vanilla Function App
-#        uses: Cheranga/GitHubActions/vanillafunctionapp@master
-#        with:
-#          credentials: ${{ secrets.AZURE_CREDENTIALS }}
-#          deploymentName: ${{ github.run_number }}-${{ env.FunctionAppName }}
-#          environmentName: dev
-#          resourceGroupName: ${{ env.ResourceGroupName }}
-#          functionAppName: ${{ env.FunctionAppName }}
-#          location: ${{ env.ResourceGroupLocation }}
-#          category: nonprod          

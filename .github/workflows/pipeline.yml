@@ -1,0 +1,20 @@
+name: Demo.Inventory.Ingestion
+concurrency: demo-inventory-ingestion
+
+on:
+  push:
+    branches:
+      - main
+      - feature/**
+
+  workflow_dispatch:
+
+jobs:
+  CI:
+    name: Build
+    uses: ./.github/workflows/build.yml
+    runs-on: ubuntu-latest
+    with:
+      projectName: Demo.Inventory.Ingestion
+      dotnetVersion: 6.0.x
+      artifactName: funcapp
