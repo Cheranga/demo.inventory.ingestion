@@ -35,6 +35,7 @@ jobs:
   provisionresources:
     name: "Provisioning resources"    
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
     steps:
       - name: Vanilla Function App
         uses: Cheranga/GitHubActions/vanillafunctionapp@master
