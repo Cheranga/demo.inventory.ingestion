@@ -20,11 +20,9 @@ jobs:
   Deploy:
     name: Deploy
     needs: CI
-    environment:
-      name: DEV
     uses: ./.github/workflows/deploy.yml
     with:
-      environment: dev
+      environment: DEV
       projectName: Demo.Inventory.Ingestion.Functions
       functionAppName: inventoryingdev
       storageName: sginventoryingdev
