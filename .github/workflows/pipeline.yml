@@ -36,7 +36,7 @@ jobs:
     name: QA
     needs: CI
     uses: ./.github/workflows/deploy.yml
-    env:
+    environment:
       envname: qa
     with:
       environment: QA
