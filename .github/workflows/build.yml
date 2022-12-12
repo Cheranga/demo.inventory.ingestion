@@ -12,7 +12,7 @@ on:
       artifactName:
         required: true
         type: string        
-          
+
 jobs:
   CI:
     name: Build
@@ -24,5 +24,3 @@ jobs:
           dotnetVersion: ${{ inputs.dotNetVersion }}
           projectName: ${{ inputs.projectName }}
           artifactName: ${{ inputs.artifactName }}
-          
-
