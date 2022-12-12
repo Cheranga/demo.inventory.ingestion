@@ -13,7 +13,6 @@ jobs:
   CI:
     name: Build
     uses: ./.github/workflows/build.yml
-    runs-on: ubuntu-latest
     with:
       projectName: Demo.Inventory.Ingestion
       dotnetVersion: 6.0.x
