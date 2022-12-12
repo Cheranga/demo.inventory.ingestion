@@ -1,8 +1,8 @@
-﻿using System.Threading.Tasks;
-using System;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 
-namespace Demo.Inventory.Ingestion.Functions.Features.ProcessInventoryChanges;
+namespace Demo.Inventory.Ingestion.Functions.Features.ReadInventoryChanges;
 
 public class ReadInventoryChangesClientFunction
 {

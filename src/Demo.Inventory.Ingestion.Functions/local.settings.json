@@ -1,7 +1,6 @@
 {
   "IsEncrypted": false,
   "Values": {
-    "Environment": "Local",
     "AcceptInventorySettings::Account": "UseDevelopmentStorage=true",
     "AcceptInventorySettings::Category": "Inventory",
     "AcceptInventorySettings::Queue": "inventory-changes",    
