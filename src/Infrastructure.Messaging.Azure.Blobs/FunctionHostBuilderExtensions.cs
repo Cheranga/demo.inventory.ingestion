@@ -3,7 +3,7 @@ using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 
-namespace Infrastructure.Messaging.Azure.Queues;
+namespace Infrastructure.Messaging.Azure.Blobs;
 
 public static class FunctionHostBuilderExtensions
 {

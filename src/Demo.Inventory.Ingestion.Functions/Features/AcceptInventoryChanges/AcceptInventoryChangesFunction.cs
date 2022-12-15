@@ -27,6 +27,7 @@ public class AcceptInventoryChangesFunction
     {
         var addOrderRequest = await request.ToModelAsync<AcceptInventoryChangeRequest>();
         var operation = await _mediator.Send(addOrderRequest);
+        
         return ToResponse(operation);
     }
 

@@ -8,3 +8,9 @@ public record struct AcceptInventorySettings(
     string Category,
     string Queue
 );
+
+[ExcludeFromCodeCoverage]
+public record struct SourceInventorySettings(string Account, string Category, string Container);
+
+[ExcludeFromCodeCoverage]
+public record struct DestinationInventorySettings(string Account, string Category, string Container);

@@ -9,4 +9,10 @@ public static class JsonExtensions
             data,
             new JsonSerializerSettings { Error = (_, args) => args.ErrorContext.Handled = true }
         );
+
+    public static TData ToModel<TData>(this string rawMessage)=>
+        JsonConvert.DeserializeObject<TData>(
+            rawMessage,
+            new JsonSerializerSettings { Error = (_, args) => args.ErrorContext.Handled = true }
+        );
 }

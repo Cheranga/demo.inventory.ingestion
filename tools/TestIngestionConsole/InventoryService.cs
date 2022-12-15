@@ -22,7 +22,7 @@ public class InventoryService : IInventoryService
     {
         var requestContent = JsonConvert.SerializeObject(request);
         var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Post,
-            new Uri("[hosted URI]/api/inventory"))
+            new Uri("https://inventoryingdev.azurewebsites.net/api/inventory"))
         {
             Content = new StringContent(requestContent)
         });
