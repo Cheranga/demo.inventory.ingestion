@@ -14,18 +14,14 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using static LanguageExt.Prelude;
 
-namespace Demo.Inventory.Ingestion.Functions.Features.DownloadFile;
+namespace Demo.Inventory.Ingestion.Functions.Features.ReadInventoryChanges;
 
-public record struct Inventory(
-    string ItemNumber,
-    string LocationCode,
-    string StockCount,
-    string LevelIndicator
-);
+public interface IReadInventoryEntity
+{
+    void Init(ReadFileRequest request);
+}
 
-public record struct InventoryCollection(List<Inventory> Items);
-
-public sealed class InventoryMap : ClassMap<Inventory>
+public sealed class InventoryMap : ClassMap<Domain.Inventory>
 {
     public InventoryMap()
     {
@@ -33,23 +29,18 @@ public sealed class InventoryMap : ClassMap<Inventory>
     }
 }
 
-public interface IReadInventoryEntity
-{
-    void Init(ReadFileRequest request);
-}
-
 [JsonObject(MemberSerialization.OptIn)]
 public class ReadInventoriesEntity : IReadInventoryEntity, IActor
 {
     [JsonProperty]
     public ReadFileRequest Request { get; set; }
-    
+
     private readonly IAzureClientFactory<BlobServiceClient> _factory;
     private readonly ILogger<ReadInventoriesEntity> _logger;
 
-    private Either<ErrorResponse, InventoryCollection> _operation = Either<
+    private Either<ErrorResponse, List<Domain.Inventory>> _operation = Either<
         ErrorResponse,
-        InventoryCollection
+        List<Domain.Inventory>
     >.Left(ErrorResponse.ToError(404, "no data found"));
 
     public ReadInventoriesEntity(
@@ -69,14 +60,16 @@ public class ReadInventoriesEntity : IReadInventoryEntity, IActor
 
     private async Task GetInventories()
     {
-        _operation = (await _factory.ReadDataFromCsv<Inventory, InventoryMap>(Request).Run()).Match(
+        _operation = (
+            await _factory.ReadDataFromCsv<Domain.Inventory, InventoryMap>(Request).Run()
+        ).Match(
             inventories =>
             {
                 _logger.LogInformation(
                     "{CorrelationId} CSV data read successfully",
                     Request.CorrelationId
                 );
-                return Right(new InventoryCollection(inventories));
+                return Right(inventories);
             },
             error =>
             {
@@ -85,7 +78,7 @@ public class ReadInventoriesEntity : IReadInventoryEntity, IActor
                     "{CorrelationId} CSV data read operation failed",
                     Request.CorrelationId
                 );
-                return Left<ErrorResponse, InventoryCollection>(
+                return Left<ErrorResponse, List<Domain.Inventory>>(
                     ErrorResponse.ToError(error.Code, error.Message)
                 );
             }

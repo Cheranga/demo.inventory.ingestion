@@ -24,9 +24,6 @@ on:
       category:
         required: true
         type: string
-      queues:
-        required: false
-        type: string        
     secrets:
       credentials:
         required: true
@@ -57,7 +54,8 @@ jobs:
           name: ${{ inputs.storageName }}
           location: ${{inputs.location}}
           storageType: ${{ inputs.category }}
-          queues: ${{ inputs.queues }}
+          queues: inventory-changes
+          blobContainers: demo-event,demo-inventory
 
       - name: Setup RBAC to Queue
         uses: Cheranga/GitHubActions/assignrbactostorage@master
@@ -79,7 +77,13 @@ jobs:
             "Environment=production" \
             "AcceptInventorySettings__Account=${{ inputs.storageName }}" \
             "AcceptInventorySettings__Category=Inventory" \
-            "AcceptInventorySettings__Queue=inventory-changes"
+            "AcceptInventorySettings__Queue=inventory-changes" \
+            "SourceInventorySettings__Account=${{ inputs.storageName }}" \
+            "SourceInventorySettings__Category=Inventory" \
+            "SourceInventorySettings__container=demo-event" \
+            "DestinationInventorySettings__Account=${{ inputs.storageName }}" \
+            "DestinationInventorySettings__Category=Inventory" \
+            "DestinationInventorySettings__container=demo-inventory" \
 
       - name: Deploy code to function app
         uses: Cheranga/GitHubActions/deploydotnetfunctionapp@master

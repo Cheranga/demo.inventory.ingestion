@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Demo.Inventory.Ingestion.Functions.Extensions;
 using Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
-using Demo.Inventory.Ingestion.Functions.Features.DownloadFile;
 using Infrastructure.Messaging.Azure.Blobs;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
