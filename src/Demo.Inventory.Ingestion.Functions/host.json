@@ -16,6 +16,6 @@
     }
   },
   "durableTask": {
-    "hubName": "InventoryIngestion"
+    "hubName": "inventoryingestion"
   }
 }

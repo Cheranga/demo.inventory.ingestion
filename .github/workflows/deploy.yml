@@ -68,6 +68,28 @@ jobs:
           friendlyName: ${{ inputs.functionAppName }}
           functionAppName: ${{ inputs.functionAppName }}
 
+      - name: Setup RBAC to blobs
+        uses: Cheranga/GitHubActions/assignrbactostorage@master
+        with:
+          deploymentName: ${{ github.run_number }}-assign-queue-rbac
+          resourceGroupName: ${{ inputs.resourceGroupName }}
+          credentials: ${{secrets.credentials}}
+          storageAccountName: ${{ inputs.storageName }}
+          accessibility: blob_contributor
+          friendlyName: ${{ inputs.functionAppName }}
+          functionAppName: ${{ inputs.functionAppName }}          
+
+      - name: Setup RBAC to tables
+        uses: Cheranga/GitHubActions/assignrbactostorage@master
+        with:
+          deploymentName: ${{ github.run_number }}-assign-queue-rbac
+          resourceGroupName: ${{ inputs.resourceGroupName }}
+          credentials: ${{secrets.credentials}}
+          storageAccountName: ${{ inputs.storageName }}
+          accessibility: table_write
+          friendlyName: ${{ inputs.functionAppName }}
+          functionAppName: ${{ inputs.functionAppName }}                
+
       - name: Update function app settings
         uses: azure/CLI@v1
         with:
