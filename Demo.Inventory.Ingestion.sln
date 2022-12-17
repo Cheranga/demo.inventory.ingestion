@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestIngestionConsole", "too
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{EBB16441-DB99-4FCE-9B93-B6052FE25484}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo.Inventory.Ingestion.Domain", "Demo.Inventory.Ingestion.Domain\Demo.Inventory.Ingestion.Domain.csproj", "{92AFF714-2F52-42B4-8169-79DFD8486366}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{C3765177-B01C-41BF-8B79-9BCBE9689495}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3765177-B01C-41BF-8B79-9BCBE9689495}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3765177-B01C-41BF-8B79-9BCBE9689495}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92AFF714-2F52-42B4-8169-79DFD8486366}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92AFF714-2F52-42B4-8169-79DFD8486366}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92AFF714-2F52-42B4-8169-79DFD8486366}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92AFF714-2F52-42B4-8169-79DFD8486366}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{92F5E1BC-E09F-43A3-8D17-1AA2D311F9C0} = {9E6876CD-9AFA-4E18-A02B-D71EDED9C61F}

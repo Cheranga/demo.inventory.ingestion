@@ -23,12 +23,19 @@
         <None Update="host.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <None Update="local.settings.json">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
     <ItemGroup>
         <Compile Remove="Extensions\BaseRequestHandler.cs" />
     </ItemGroup>
     <ItemGroup>
+      <ProjectReference Include="..\..\Demo.Inventory.Ingestion.Domain\Demo.Inventory.Ingestion.Domain.csproj" />
       <ProjectReference Include="..\Infrastructure.Messaging.Azure.Blobs\Infrastructure.Messaging.Azure.Blobs.csproj" />
       <ProjectReference Include="..\Infrastructure.Messaging.Azure.Queues\Infrastructure.Messaging.Azure.Queues.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Features\ValidateAndUpload" />
     </ItemGroup>
 </Project>

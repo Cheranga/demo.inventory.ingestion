@@ -13,4 +13,8 @@
       <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage.Blobs" Version="5.0.1" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\Demo.Inventory.Ingestion.Domain\Demo.Inventory.Ingestion.Domain.csproj" />
+    </ItemGroup>
+
 </Project>

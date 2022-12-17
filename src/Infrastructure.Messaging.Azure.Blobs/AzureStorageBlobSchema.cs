@@ -44,4 +44,22 @@ public static class AzureStorageBlobSchema
             return csvReader.GetRecords<TData>().ToList();
         })
         select response;
+
+    public static Aff<Unit> Upload(
+        this IAzureClientFactory<BlobServiceClient> factory,
+        FileUploadRequest request
+    )
+    {
+        return (
+            from blobServiceClient in Eff(() => factory.CreateClient(request.Category))
+            from blobContainerClient in Eff(
+                () => blobServiceClient.GetBlobContainerClient(request.Container)
+            )
+            from blobClient in Eff(() => blobContainerClient.GetBlobClient(request.FileName))
+            from response in Aff(
+                async () => await blobClient.UploadAsync(BinaryData.FromString(request.Content), true)
+            )
+            select response
+        ).Map(_ => unit);
+    }
 }

@@ -1,7 +1,4 @@
-﻿using System.Globalization;
-using CsvHelper.Configuration;
-
-namespace Demo.Inventory.Ingestion.Functions.Domain;
+﻿namespace Demo.Inventory.Ingestion.Domain;
 
 public record struct Inventory(
     string ItemNumber,

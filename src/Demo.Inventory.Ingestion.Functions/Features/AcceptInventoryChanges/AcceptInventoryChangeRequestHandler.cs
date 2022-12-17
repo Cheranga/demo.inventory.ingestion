@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Demo.Inventory.Ingestion.Functions.Core;
+using Demo.Inventory.Ingestion.Domain;
 using Demo.Inventory.Ingestion.Functions.Extensions;
 using FluentValidation;
 using Infrastructure.Messaging.Azure.Queues;

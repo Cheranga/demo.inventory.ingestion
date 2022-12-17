@@ -1,18 +1,16 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
-using Azure.Storage.Blobs;
 using CsvHelper.Configuration;
-using Demo.Inventory.Ingestion.Functions.Core;
+using Demo.Inventory.Ingestion.Domain;
 using Demo.Inventory.Ingestion.Functions.Extensions;
+using Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
 using Infrastructure.Messaging.Azure.Blobs;
 using LanguageExt;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
-using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using static LanguageExt.Prelude;
 
 namespace Demo.Inventory.Ingestion.Functions.Features.ReadInventoryChanges;
 
@@ -35,7 +33,8 @@ public class ReadInventoriesEntity : IReadInventoryEntity, IActor
     [JsonProperty]
     public ReadFileRequest Request { get; set; }
 
-    private readonly IAzureClientFactory<BlobServiceClient> _factory;
+    private readonly DestinationInventorySettings _settings;
+    private readonly IBlobManager _blobManager;
     private readonly ILogger<ReadInventoriesEntity> _logger;
 
     private Either<ErrorResponse, List<Domain.Inventory>> _operation = Either<
@@ -44,11 +43,13 @@ public class ReadInventoriesEntity : IReadInventoryEntity, IActor
     >.Left(ErrorResponse.ToError(404, "no data found"));
 
     public ReadInventoriesEntity(
-        IAzureClientFactory<BlobServiceClient> factory,
+        DestinationInventorySettings settings,
+        IBlobManager blobManager,
         ILogger<ReadInventoriesEntity> logger
     )
     {
-        _factory = factory;
+        _settings = settings;
+        _blobManager = blobManager;
         _logger = logger;
     }
 
@@ -58,33 +59,46 @@ public class ReadInventoriesEntity : IReadInventoryEntity, IActor
         Entity.Current.SignalEntity(Entity.Current.EntityId, nameof(GetInventories));
     }
 
-    private async Task GetInventories()
-    {
-        _operation = (
-            await _factory.ReadDataFromCsv<Domain.Inventory, InventoryMap>(Request).Run()
+    private async Task GetInventories() =>
+        (
+            await (
+                from inventories in _blobManager.ReadDataFromCsv<Domain.Inventory, InventoryMap>(
+                    Request
+                )
+                from _ in inventories.SequenceParallel(UploadInventory)
+                select _
+            ).Run()
         ).Match(
-            inventories =>
+            _ =>
             {
                 _logger.LogInformation(
-                    "{CorrelationId} CSV data read successfully",
+                    "{CorrelationId} successfully uploaded file content",
                     Request.CorrelationId
                 );
-                return Right(inventories);
             },
             error =>
             {
                 _logger.LogError(
                     error.ToException(),
-                    "{CorrelationId} CSV data read operation failed",
+                    "{CorrelationId} file upload operation/s failed",
                     Request.CorrelationId
-                );
-                return Left<ErrorResponse, List<Domain.Inventory>>(
-                    ErrorResponse.ToError(error.Code, error.Message)
                 );
             }
         );
 
-        // TODO: call the next actor depending on the operation
+    private Aff<Unit> UploadInventory(Domain.Inventory inventory)
+    {
+        var fileName = $"{inventory.LocationCode}/{inventory.ItemNumber}.json";
+        var content = JsonConvert.SerializeObject(inventory);
+        var uploadRequest = new FileUploadRequest(
+            Request.CorrelationId,
+            _settings.Category,
+            _settings.Container,
+            fileName,
+            content
+        );
+
+        return _blobManager.Upload(uploadRequest);
     }
 
     [FunctionName(nameof(ReadInventoriesEntity))]
