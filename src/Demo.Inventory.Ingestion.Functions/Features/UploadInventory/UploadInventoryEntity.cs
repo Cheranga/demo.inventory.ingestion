@@ -48,6 +48,8 @@ public class UploadInventoryEntity : IUploadInventoryEntity, IActor
                     "{CorrelationId} successfully uploaded file content",
                     Request.CorrelationId
                 );
+                
+                Entity.Current.DeleteState();
             },
             error =>
             {
@@ -56,6 +58,8 @@ public class UploadInventoryEntity : IUploadInventoryEntity, IActor
                     "{CorrelationId} file upload operation/s failed",
                     Request.CorrelationId
                 );
+                
+                Entity.Current.DeleteState();
             }
         );
     }

@@ -5,10 +5,7 @@ using static LanguageExt.Prelude;
 
 namespace Demo.Inventory.Ingestion.Functions.Extensions;
 
-public interface ITrackable
-{
-    public string CorrelationId { get; init; }
-}
+
 
 public static class MediatorExtensions
 {

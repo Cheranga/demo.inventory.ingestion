@@ -1,8 +1,7 @@
-using Demo.Inventory.Ingestion.Functions.Extensions;
 using FluentValidation;
 using MediatR;
 
-namespace Demo.Inventory.Ingestion.Functions.Core;
+namespace Demo.Inventory.Ingestion.Domain;
 
 public record BaseMediatorRequest<TRequest, TResponse, TValidator>
     where TRequest : BaseMediatorRequest<TRequest, TResponse, TValidator>, IRequest<TResponse>, ITrackable
