@@ -1,16 +1,19 @@
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using CsvHelper.Configuration;
 using Demo.Inventory.Ingestion.Domain;
 using Demo.Inventory.Ingestion.Functions.Extensions;
 using Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
+using Demo.Inventory.Ingestion.Functions.Features.UploadInventory;
 using Infrastructure.Messaging.Azure.Blobs;
 using LanguageExt;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using static LanguageExt.Prelude;
 
 namespace Demo.Inventory.Ingestion.Functions.Features.ReadInventoryChanges;
 
@@ -65,7 +68,7 @@ public class ReadInventoriesEntity : IReadInventoryEntity, IActor
                 from inventories in _blobManager.ReadDataFromCsv<Domain.Inventory, InventoryMap>(
                     Request
                 )
-                from _ in inventories.SequenceParallel(UploadInventory)
+                from _ in Upload(inventories)
                 select _
             ).Run()
         ).Match(
@@ -85,6 +88,38 @@ public class ReadInventoriesEntity : IReadInventoryEntity, IActor
                 );
             }
         );
+
+    private Aff<Unit> Upload(List<Domain.Inventory> inventories)
+    {
+        var groups = inventories
+            .Select((x, i) => new { Index = i, Value = x })
+            .GroupBy(x => x.Index / 100)
+            .Select(x => x.Select(v => v.Value).ToList())
+            .ToList();
+
+        var index = 1;
+        foreach (var group in groups)
+        {
+            var entityId = $"{Request.CorrelationId}::{index++}"
+                .ToString()
+                .GetEntityId<UploadInventoryEntity>();
+
+            Entity.Current.SignalEntity<IUploadInventoryEntity>(
+                entityId,
+                entity =>
+                    entity.Init(
+                        new BulkUploadRequest<Domain.Inventory>(
+                            Request.CorrelationId,
+                            Request.Category,
+                            _settings.Container,
+                            group
+                        )
+                    )
+            );
+        }
+
+        return SuccessAff(unit);
+    }
 
     private Aff<Unit> UploadInventory(Domain.Inventory inventory)
     {
