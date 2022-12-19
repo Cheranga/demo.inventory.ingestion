@@ -14,5 +14,8 @@
         "excludedTypes": "Request"
       }
     }
+  },
+  "durableTask": {
+    "hubName": "inventoryingestion"
   }
 }

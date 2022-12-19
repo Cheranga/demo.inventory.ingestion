@@ -29,7 +29,6 @@ jobs:
       resourceGroupName: cc-rg-inventorying-dev
       location: australiasoutheast
       category: nonprod
-      queues: inventory-changes  
     secrets:
       credentials: ${{ secrets.AZURE_CREDENTIALS }}
   QA:
@@ -44,6 +43,5 @@ jobs:
       resourceGroupName: cc-rg-inventorying-qa
       location: australiasoutheast
       category: nonprod
-      queues: inventory-changes  
     secrets:
       credentials: ${{ secrets.AZURE_CREDENTIALS }}

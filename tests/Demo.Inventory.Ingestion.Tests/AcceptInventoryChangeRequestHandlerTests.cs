@@ -1,5 +1,4 @@
 using BunsenBurner;
-using Demo.Inventory.Ingestion.Functions.Extensions;
 using Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
 using Demo.Inventory.Ingestion.Tests.Extensions;
 using FluentAssertions;

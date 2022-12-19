@@ -8,6 +8,8 @@
         <PackageReference Include="LanguageExt.Core" Version="4.4.0" />
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
         <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.1.0" />
+        <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask" Version="2.9.0" />
+        <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask.Analyzers" Version="0.5.0" />
         <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage.Blobs" Version="5.0.1" />
         <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage.Queues" Version="5.0.1" />
         <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.1.1" />
@@ -22,14 +24,15 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <None Update="local.settings.json">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>
     <ItemGroup>
         <Compile Remove="Extensions\BaseRequestHandler.cs" />
     </ItemGroup>
     <ItemGroup>
+      <ProjectReference Include="..\..\Demo.Inventory.Ingestion.Domain\Demo.Inventory.Ingestion.Domain.csproj" />
+      <ProjectReference Include="..\Infrastructure.Messaging.Azure.Blobs\Infrastructure.Messaging.Azure.Blobs.csproj" />
       <ProjectReference Include="..\Infrastructure.Messaging.Azure.Queues\Infrastructure.Messaging.Azure.Queues.csproj" />
     </ItemGroup>
 </Project>

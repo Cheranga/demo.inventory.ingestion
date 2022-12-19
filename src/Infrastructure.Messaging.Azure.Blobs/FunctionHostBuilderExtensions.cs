@@ -2,8 +2,9 @@
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Infrastructure.Messaging.Azure.Queues;
+namespace Infrastructure.Messaging.Azure.Blobs;
 
 public static class FunctionHostBuilderExtensions
 {
@@ -29,18 +30,19 @@ public static class FunctionHostBuilderExtensions
         builder.Services.AddAzureClients(clientBuilder =>
         {
             var queueBuilder = (
-                    isLocal
-                        ? clientBuilder.AddBlobServiceClient(account)
-                        : clientBuilder.AddBlobServiceClient(
-                            new Uri($"https://{account}.blob.core.windows.net")
-                        )
-                )
-                .WithName(name);
+                isLocal
+                    ? clientBuilder.AddBlobServiceClient(account)
+                    : clientBuilder.AddBlobServiceClient(
+                        new Uri($"https://{account}.blob.core.windows.net")
+                    )
+            ).WithName(name);
 
             if (!builder.IsNonProd())
             {
                 queueBuilder.WithCredential(new ManagedIdentityCredential());
             }
         });
+
+        builder.Services.AddSingleton<IBlobManager, AzureStorageBlobManager>();
     }
 }

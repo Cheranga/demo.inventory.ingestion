@@ -2,6 +2,7 @@
 using Demo.Inventory.Ingestion.Functions.Extensions;
 using Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
 using FluentValidation;
+using Infrastructure.Messaging.Azure.Blobs;
 using Infrastructure.Messaging.Azure.Queues;
 using MediatR;
 using Microsoft.ApplicationInsights.Extensibility;
@@ -47,11 +48,24 @@ public class Startup : FunctionsStartup
     private static void RegisterSettings(
         IFunctionsHostBuilder builder,
         IConfiguration configuration
-    ) =>
+    )
+    {
         builder.Services.RegisterFromConfiguration<AcceptInventorySettings>(
             configuration,
             ServiceLifetime.Singleton
         );
+        
+        builder.Services.RegisterFromConfiguration<SourceInventorySettings>(
+            configuration,
+            ServiceLifetime.Singleton
+        );
+        
+        builder.Services.RegisterFromConfiguration<DestinationInventorySettings>(
+            configuration,
+            ServiceLifetime.Singleton
+        );
+    }
+        
 
     private static void RegisterAzureClients(
         IFunctionsHostBuilder builder,
@@ -62,7 +76,29 @@ public class Startup : FunctionsStartup
             .GetSection(nameof(AcceptInventorySettings))
             .Get<AcceptInventorySettings>();
 
-        builder.RegisterQueueServiceClient(configuration, addOrderSettings.Account, addOrderSettings.Category);
+        var sourceInventorySettings = configuration
+            .GetSection(nameof(SourceInventorySettings))
+            .Get<SourceInventorySettings>();
+
+        var destinationInventorySettings = configuration
+            .GetSection(nameof(DestinationInventorySettings))
+            .Get<DestinationInventorySettings>();
+
+        builder.RegisterQueueServiceClient(
+            configuration,
+            addOrderSettings.Account,
+            addOrderSettings.Category
+        );
+        builder.RegisterBlobServiceClient(
+            configuration,
+            sourceInventorySettings.Account,
+            sourceInventorySettings.Category
+        );
+        builder.RegisterBlobServiceClient(
+            configuration,
+            destinationInventorySettings.Account,
+            destinationInventorySettings.Category
+        );
     }
 
     private static void RegisterMessaging(IFunctionsHostBuilder builder)
@@ -70,14 +106,19 @@ public class Startup : FunctionsStartup
         var services = builder.Services;
         services.AddSingleton<IMessagePublisher, AzureQueueStorageMessagePublisher>();
     }
-    
+
     private static void RegisterLogging(IServiceCollection services)
     {
         services.AddLogging(builder =>
         {
-            var logger = new LoggerConfiguration()
-                .WriteTo.ColoredConsole(outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
-                .WriteTo.ApplicationInsights(TelemetryConfiguration.CreateDefault(), TelemetryConverter.Traces)
+            var logger = new LoggerConfiguration().WriteTo
+                .ColoredConsole(
+                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+                )
+                .WriteTo.ApplicationInsights(
+                    TelemetryConfiguration.CreateDefault(),
+                    TelemetryConverter.Traces
+                )
                 .CreateLogger();
 
             builder.AddSerilog(logger);

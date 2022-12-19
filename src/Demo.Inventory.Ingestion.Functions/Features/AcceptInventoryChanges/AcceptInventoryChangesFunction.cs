@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Demo.Inventory.Ingestion.Functions.Core;
+using Demo.Inventory.Ingestion.Domain;
 using Demo.Inventory.Ingestion.Functions.Extensions;
 using LanguageExt;
 using MediatR;
@@ -27,6 +27,7 @@ public class AcceptInventoryChangesFunction
     {
         var addOrderRequest = await request.ToModelAsync<AcceptInventoryChangeRequest>();
         var operation = await _mediator.Send(addOrderRequest);
+        
         return ToResponse(operation);
     }
 

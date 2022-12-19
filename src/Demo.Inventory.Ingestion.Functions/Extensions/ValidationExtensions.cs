@@ -1,4 +1,5 @@
 ﻿using System.Threading;
+using Demo.Inventory.Ingestion.Domain;
 using FluentValidation;
 using FluentValidation.Results;
 using LanguageExt;

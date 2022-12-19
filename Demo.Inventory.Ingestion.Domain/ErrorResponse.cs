@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using FluentValidation.Results;
+﻿using FluentValidation.Results;
 
-namespace Demo.Inventory.Ingestion.Functions.Core;
+namespace Demo.Inventory.Ingestion.Domain;
 
 public class ErrorResponse
 {
