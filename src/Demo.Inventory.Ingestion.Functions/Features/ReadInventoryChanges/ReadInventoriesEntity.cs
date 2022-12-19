@@ -62,34 +62,24 @@ public class ReadInventoriesEntity : IReadInventoryEntity, IActor
         Entity.Current.SignalEntity(Entity.Current.EntityId, nameof(GetInventories));
     }
 
-    private async Task GetInventories() =>
-        (
-            await (
-                from inventories in _blobManager.ReadDataFromCsv<Domain.Inventory, InventoryMap>(
-                    Request
-                )
-                from _ in Upload(inventories)
-                select _
-            ).Run()
-        ).Match(
-            _ =>
-            {
-                _logger.LogInformation(
-                    "{CorrelationId} successfully uploaded file content",
-                    Request.CorrelationId
-                );
-            },
-            error =>
-            {
-                _logger.LogError(
-                    error.ToException(),
-                    "{CorrelationId} file upload operation/s failed",
-                    Request.CorrelationId
-                );
-            }
-        );
+    private async Task GetInventories()
+    {
+        var operation = await _blobManager.ReadDataFromCsv<Domain.Inventory, InventoryMap>(Request);
+        if (operation.IsLeft)
+        {
+            _logger.LogError(
+                "{CorrelationId}::{EntityId} reading CSV data failed",
+                Request.CorrelationId,
+                Entity.Current.EntityId
+            );
+            return;
+        }
 
-    private Aff<Unit> Upload(List<Domain.Inventory> inventories)
+        var inventories = operation.Match(x => x, _ => new List<Domain.Inventory>());
+        Upload(inventories);
+    }
+
+    private Unit Upload(List<Domain.Inventory> inventories)
     {
         var groups = inventories
             .Select((x, i) => new { Index = i, Value = x })
@@ -118,7 +108,7 @@ public class ReadInventoriesEntity : IReadInventoryEntity, IActor
             );
         }
 
-        return SuccessAff(unit);
+        return unit;
     }
 
     private Aff<Unit> UploadInventory(Domain.Inventory inventory)
