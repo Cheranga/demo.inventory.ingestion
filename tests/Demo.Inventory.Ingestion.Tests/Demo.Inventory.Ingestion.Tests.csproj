@@ -28,4 +28,8 @@
       <ProjectReference Include="..\..\src\Demo.Inventory.Ingestion.Functions\Demo.Inventory.Ingestion.Functions.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Infrastructure" />
+    </ItemGroup>
+
 </Project>
