@@ -29,7 +29,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Infrastructure" />
+      <Folder Include="Infrastructure\Demo\Queues" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="AcceptInventoryChangeRequestHandlerTests.cs" />
     </ItemGroup>
 
 </Project>

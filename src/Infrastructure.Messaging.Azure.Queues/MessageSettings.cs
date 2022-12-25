@@ -15,6 +15,9 @@ public record MessageSettings
 
     public static MessageSettings New(int visibilityInSeconds, int timeToLiveInSeconds) =>
         new(TimeSpan.FromSeconds(visibilityInSeconds), TimeSpan.FromSeconds(timeToLiveInSeconds));
+    
+    public static MessageSettings New() =>
+        new(TimeSpan.Zero, TimeSpan.Zero);
 
     public bool IsDefaultSettings() => Visibility == TimeSpan.Zero && TimeToLive == TimeSpan.Zero;
 }

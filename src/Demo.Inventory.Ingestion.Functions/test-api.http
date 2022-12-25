@@ -2,6 +2,6 @@ POST http://localhost:7071/api/inventory
 Content-Type: application/json
 
 {
-  "correlationId": "666",
-  "fileName": "AU_1_20221007000000_62b08f0d-c17c-426e-b5ba-94bea0eb5953_10.csv"
+  "correlationId": "111",
+  "fileName": "AU_10.csv"
 }

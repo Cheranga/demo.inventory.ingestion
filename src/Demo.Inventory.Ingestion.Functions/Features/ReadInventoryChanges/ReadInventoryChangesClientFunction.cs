@@ -17,7 +17,7 @@ public class ReadInventoryChangesClientFunction
         _settings = settings;
     }
 
-    [FunctionName(nameof(ReadInventoryChangesClientFunction))]
+    //[FunctionName(nameof(ReadInventoryChangesClientFunction))]
     public async Task RunAsync(
         [QueueTrigger("%AcceptInventorySettings:Queue%")] string message,
         [DurableClient] IDurableEntityClient entityClient
