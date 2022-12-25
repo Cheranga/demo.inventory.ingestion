@@ -44,20 +44,17 @@ public record AcceptInventoryChangeRequestHandler
         (
             await (
                 from _ in _validator.ValidateAff(request, _logger, cancellationToken)
-                from __ in QueueOperationsSchema<LiveQueueRunTime>.Publish(new MessageOperation(request.CorrelationId,
-                    _settings.Category,
-                    _settings.Queue,
-                    MessageSettings.DefaultSettings, 
-                    request.ToJson))
-                    // _messagePublisher.PublishAsync(
-                    // request.CorrelationId,
-                    // _settings.Category,
-                    // _settings.Queue,
-                    // request.ToJson,
-                    // MessageSettings.DefaultSettings,
-                    // _logger
+                from __ in QueueOperationsSchema<LiveQueueRunTime>.Publish(
+                    new MessageOperation(
+                        request.CorrelationId,
+                        _settings.Category,
+                        _settings.Queue,
+                        MessageSettings.DefaultSettings,
+                        request.ToJson
+                    )
+                )
                 select __
-                ).Run(LiveQueueRunTime.New(_factory))
+            ).Run(LiveQueueRunTime.New(_factory))
         ).Match(
             _ =>
             {

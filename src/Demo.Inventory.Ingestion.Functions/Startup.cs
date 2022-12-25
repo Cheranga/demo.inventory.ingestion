@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Serilog;
+using Serilog.Events;
 
 [assembly: FunctionsStartup(typeof(Startup))]
 
@@ -26,6 +27,7 @@ public class Startup : FunctionsStartup
         RegisterSettings(builder, configuration);
         RegisterAzureClients(builder, configuration);
         RegisterMessaging(builder);
+        RegisterLogging(builder.Services);
 
         builder.Services.AddValidatorsFromAssembly(typeof(Startup).Assembly);
         builder.Services.AddMediatR(typeof(Startup).Assembly);
@@ -54,18 +56,17 @@ public class Startup : FunctionsStartup
             configuration,
             ServiceLifetime.Singleton
         );
-        
+
         builder.Services.RegisterFromConfiguration<SourceInventorySettings>(
             configuration,
             ServiceLifetime.Singleton
         );
-        
+
         builder.Services.RegisterFromConfiguration<DestinationInventorySettings>(
             configuration,
             ServiceLifetime.Singleton
         );
     }
-        
 
     private static void RegisterAzureClients(
         IFunctionsHostBuilder builder,
@@ -111,10 +112,17 @@ public class Startup : FunctionsStartup
     {
         services.AddLogging(builder =>
         {
-            var logger = new LoggerConfiguration().WriteTo
-                .ColoredConsole(
-                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
-                )
+            var logger = new LoggerConfiguration().MinimumLevel
+                .Information()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                .MinimumLevel.Override("System", LogEventLevel.Warning)
+                .MinimumLevel.Override("Worker", LogEventLevel.Warning)
+                .MinimumLevel.Override("Host", LogEventLevel.Warning)
+                .MinimumLevel.Override("Function", LogEventLevel.Warning)
+                .MinimumLevel.Override("Azure", LogEventLevel.Warning)
+                .MinimumLevel.Override("DurableTask", LogEventLevel.Warning)
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
                 .WriteTo.ApplicationInsights(
                     TelemetryConfiguration.CreateDefault(),
                     TelemetryConverter.Traces

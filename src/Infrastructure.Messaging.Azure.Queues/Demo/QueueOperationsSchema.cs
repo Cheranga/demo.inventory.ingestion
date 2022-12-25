@@ -7,6 +7,7 @@ public static class QueueOperationsSchema<RT>
     where RT : struct, IHaveQueueOperations<RT>, HasCancel<RT>
 {
     public static Aff<RT, Unit> Publish(MessageOperation operation) =>
-        from op in default(RT).QueueOperations.MapAsync(op => op.Publish(operation))
+        from rto in default(RT).QueueOperations
+        from op in rto.Publish(operation)
         select op;
 }

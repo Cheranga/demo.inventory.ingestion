@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Demo.Inventory.Ingestion.Domain;
 using Demo.Inventory.Ingestion.Functions.Core;
-using Demo.Inventory.Ingestion.Functions.Extensions;
 using FluentValidation;
 using LanguageExt;
 using MediatR;

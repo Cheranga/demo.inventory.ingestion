@@ -2,6 +2,7 @@
 using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
 using LanguageExt;
+using LanguageExt.Common;
 using Microsoft.Extensions.Azure;
 using static LanguageExt.Prelude;
 
@@ -14,59 +15,81 @@ public class LiveQueueOperations : IQueueOperations
     public LiveQueueOperations(IAzureClientFactory<QueueServiceClient> factory) =>
         _factory = factory;
 
-    public async ValueTask<Unit> Publish(MessageOperation operation)
-    {
-        var a = (
-            await (
-                from sc in TryAsync(
-                    async () => await _factory.CreateClient(operation.Category).AsValueTask()
-                )
-                from qc in TryAsync(
-                    async () => await sc.GetQueueClient(operation.Queue).AsValueTask()
-                )
-                from po in operation.Settings.IsDefaultSettings()
-                    ? TryAsync<Response<SendReceipt>>(
-                        async () => await qc.SendMessageAsync(operation.MessageContentFunc())
+    private static Eff<QueueServiceClient> GetQueueServiceClient(
+        IAzureClientFactory<QueueServiceClient> factory,
+        string name
+    ) =>
+        EffMaybe<QueueServiceClient>(() => factory.CreateClient(name))
+            .MapFail(
+                _ =>
+                    Error.New(
+                        ErrorCodes.QueueServiceClientNotFound,
+                        ErrorMessages.QueueServiceClientNotFound
                     )
-                    : TryAsync<Response<SendReceipt>>(
-                        async () =>
-                            await qc.SendMessageAsync(
-                                operation.MessageContentFunc(),
-                                operation.Settings.Visibility,
-                                operation.Settings.TimeToLive
-                            )
-                    )
-                select po
+            );
+
+    private static Eff<QueueClient> GetQueueClient(
+        QueueServiceClient serviceclient,
+        string queue
+    ) =>
+        EffMaybe<QueueClient>(() => serviceclient.GetQueueClient(queue))
+            .MapFail(
+                _ => Error.New(ErrorCodes.QueueClientNotFound, ErrorMessages.QueueClientNotFound)
+            );
+
+    private static Aff<Response<SendReceipt>> PublishDefault(
+        QueueClient client,
+        Func<string> messageContentFunc
+    ) =>
+        AffMaybe<Response<SendReceipt>>(
+                async () => await client.SendMessageAsync(messageContentFunc())
             )
-        ).Match(
+            .MapFail(
+                _ =>
+                    Error.New(
+                        ErrorCodes.UnableToPublishWithDefaultMessageSettings,
+                        ErrorMessages.UnableToPublishWithDefaultMessageSettings
+                    )
+            );
+
+    private static Aff<Response<SendReceipt>> PublishSpecific(
+        QueueClient client,
+        Func<string> messageContentFunc,
+        MessageSettings settings
+    ) =>
+        AffMaybe<Response<SendReceipt>>(
+                async () =>
+                    await client.SendMessageAsync(
+                        messageContentFunc(),
+                        settings.Visibility,
+                        settings.TimeToLive
+                    )
+            )
+            .MapFail(
+                _ =>
+                    Error.New(
+                        ErrorCodes.UnableToPublishWithProvidedMessageSettings,
+                        ErrorMessages.UnableToPublishWithProvidedMessageSettings
+                    )
+            );
+
+    public Aff<Unit> Publish(MessageOperation operation) =>
+        (
+            from sc in GetQueueServiceClient(_factory, operation.Category)
+            from qc in GetQueueClient(sc, operation.Queue)
+            from op in operation.Settings.IsDefaultSettings()
+                ? PublishDefault(qc, operation.MessageContentFunc)
+                : PublishSpecific(qc, operation.MessageContentFunc, operation.Settings)
+            select op
+        ).Map(
             response =>
                 response.GetRawResponse().IsError
-                    ? throw new MessagePublishException(response)
-                    : unit,
-            exception => throw new MessagePublishException(exception.Message, exception)
+                    ? throw new MessagePublishException(
+                        Error.New(
+                            ErrorCodes.UnableToPublishToQueue,
+                            response.GetRawResponse().ReasonPhrase
+                        )
+                    )
+                    : unit
         );
-
-        return a;
-
-        // var a =   await (
-        //        from sc in EffMaybe<QueueServiceClient>(() => _factory.CreateClient(operation.Category))
-        //        from qc in EffMaybe<QueueClient>(() => sc.GetQueueClient(operation.Queue))
-        //        from po in operation.Settings.IsDefaultSettings()
-        //            ? AffMaybe<Response<SendReceipt>>(
-        //                async () => await qc.SendMessageAsync(operation.MessageContentFunc())
-        //            )
-        //            : AffMaybe<Response<SendReceipt>>(
-        //                async () =>
-        //                    await qc.SendMessageAsync(
-        //                        operation.MessageContentFunc(),
-        //                        operation.Settings.Visibility,
-        //                        operation.Settings.TimeToLive
-        //                    )
-        //            )
-        //        select po
-        //    ).BiMap(
-        //        op => op.GetRawResponse().IsError ? throw new MessagePublishException(op) : unit.AsValueTask(),
-        //        error => throw new MessagePublishException(error.Message, error.ToException())
-        //    ).Run().Map(fin => fin.);
-    }
 }

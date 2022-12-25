@@ -7,7 +7,6 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using static LanguageExt.Prelude;
 
 namespace Demo.Inventory.Ingestion.Functions.Features.UploadInventory;
 
