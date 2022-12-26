@@ -36,4 +36,10 @@
       <Compile Remove="AcceptInventoryChangeRequestHandlerTests.cs" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="TestData\test.txt">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

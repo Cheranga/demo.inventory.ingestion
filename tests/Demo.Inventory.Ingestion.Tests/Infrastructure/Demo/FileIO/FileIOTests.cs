@@ -10,7 +10,7 @@ public static class FileIOTests
     {
         var runTime = LiveFileRunTime.New();
 
-        var inputFilePath = @"c:\Cheranga\test.txt";
+        var inputFilePath = @"TestData\test.txt";
 
         var operation = await (
             from op in FileOperationsSchema<LiveFileRunTime>.ReadAllText(inputFilePath)
