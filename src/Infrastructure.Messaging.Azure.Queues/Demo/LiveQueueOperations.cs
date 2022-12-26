@@ -15,6 +15,24 @@ public class LiveQueueOperations : IQueueOperations
     public LiveQueueOperations(IAzureClientFactory<QueueServiceClient> factory) =>
         _factory = factory;
 
+    public Aff<Unit> Publish(MessageOperation operation) =>
+        (
+            from sc in GetQueueServiceClient(_factory, operation.Category)
+            from qc in GetQueueClient(sc, operation.Queue)
+            from op in PublishMessage(qc, operation.MessageContentFunc, operation.Settings)
+            select op
+        ).Map(
+            response =>
+                response.GetRawResponse().IsError
+                    ? throw new MessagePublishException(
+                        Error.New(
+                            ErrorCodes.UnableToPublishToQueue,
+                            response.GetRawResponse().ReasonPhrase
+                        )
+                    )
+                    : unit
+        );
+
     private static Eff<QueueServiceClient> GetQueueServiceClient(
         IAzureClientFactory<QueueServiceClient> factory,
         string name
@@ -37,59 +55,36 @@ public class LiveQueueOperations : IQueueOperations
                 _ => Error.New(ErrorCodes.QueueClientNotFound, ErrorMessages.QueueClientNotFound)
             );
 
-    private static Aff<Response<SendReceipt>> PublishDefault(
-        QueueClient client,
-        Func<string> messageContentFunc
-    ) =>
-        AffMaybe<Response<SendReceipt>>(
-                async () => await client.SendMessageAsync(messageContentFunc())
-            )
-            .MapFail(
-                _ =>
-                    Error.New(
-                        ErrorCodes.UnableToPublishWithDefaultMessageSettings,
-                        ErrorMessages.UnableToPublishWithDefaultMessageSettings
-                    )
-            );
-
-    private static Aff<Response<SendReceipt>> PublishSpecific(
+    private static Aff<Response<SendReceipt>> PublishMessage(
         QueueClient client,
         Func<string> messageContentFunc,
         MessageSettings settings
     ) =>
-        AffMaybe<Response<SendReceipt>>(
-                async () =>
-                    await client.SendMessageAsync(
-                        messageContentFunc(),
-                        settings.Visibility,
-                        settings.TimeToLive
-                    )
-            )
-            .MapFail(
-                _ =>
-                    Error.New(
-                        ErrorCodes.UnableToPublishWithProvidedMessageSettings,
-                        ErrorMessages.UnableToPublishWithProvidedMessageSettings
-                    )
-            );
-
-    public Aff<Unit> Publish(MessageOperation operation) =>
-        (
-            from sc in GetQueueServiceClient(_factory, operation.Category)
-            from qc in GetQueueClient(sc, operation.Queue)
-            from op in operation.Settings.IsDefaultSettings()
-                ? PublishDefault(qc, operation.MessageContentFunc)
-                : PublishSpecific(qc, operation.MessageContentFunc, operation.Settings)
-            select op
-        ).Map(
-            response =>
-                response.GetRawResponse().IsError
-                    ? throw new MessagePublishException(
+        from op in settings.IsDefaultSettings()
+            ? AffMaybe<Response<SendReceipt>>(
+                    async () => await client.SendMessageAsync(messageContentFunc())
+                )
+                .MapFail(
+                    _ =>
                         Error.New(
-                            ErrorCodes.UnableToPublishToQueue,
-                            response.GetRawResponse().ReasonPhrase
+                            ErrorCodes.UnableToPublishWithDefaultMessageSettings,
+                            ErrorMessages.UnableToPublishWithDefaultMessageSettings
                         )
-                    )
-                    : unit
-        );
+                )
+            : AffMaybe<Response<SendReceipt>>(
+                    async () =>
+                        await client.SendMessageAsync(
+                            messageContentFunc(),
+                            settings.Visibility,
+                            settings.TimeToLive
+                        )
+                )
+                .MapFail(
+                    _ =>
+                        Error.New(
+                            ErrorCodes.UnableToPublishWithProvidedMessageSettings,
+                            ErrorMessages.UnableToPublishWithProvidedMessageSettings
+                        )
+                )
+        select op;
 }

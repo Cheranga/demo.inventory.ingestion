@@ -25,5 +25,6 @@ public readonly struct LiveQueueRunTime
     public CancellationToken CancellationToken => _env.Token;
     public CancellationTokenSource CancellationTokenSource => _env.Source;
 
-    public static LiveQueueRunTime New(IAzureClientFactory<QueueServiceClient> factory) => new(RuntimeEnv.New(), factory);
+    public static LiveQueueRunTime New(IAzureClientFactory<QueueServiceClient> factory) =>
+        new(RuntimeEnv.New(), factory);
 }
