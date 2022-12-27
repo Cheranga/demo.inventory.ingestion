@@ -2,5 +2,5 @@
 
 public interface ITrackable
 {
-    public string CorrelationId { get; init; }
+    public string CorrelationId { get; set; }
 }

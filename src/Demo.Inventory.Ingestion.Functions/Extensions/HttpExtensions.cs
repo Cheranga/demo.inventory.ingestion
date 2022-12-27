@@ -11,7 +11,6 @@ public static class HttpExtensions
         new() { Error = (_, args) => args.ErrorContext.Handled = true };
 
     public static async Task<TModel> ToModelAsync<TModel>(this HttpRequest request)
-        where TModel : class
     {
         // TODO: return better type
         var content = await request.ReadAsStringAsync();

@@ -4,7 +4,7 @@ namespace Demo.Inventory.Ingestion.Functions.Extensions;
 
 public static class JsonExtensions
 {
-    public static string ToJson<T>(this T data) where T : class =>
+    public static string ToJson<T>(this T data)=>
         JsonConvert.SerializeObject(
             data,
             new JsonSerializerSettings { Error = (_, args) => args.ErrorContext.Handled = true }

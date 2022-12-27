@@ -1,19 +1,18 @@
-﻿using System.Text;
+﻿using Azure.Storage.Queues;
+using Microsoft.Extensions.Azure;
 
 namespace Infrastructure.Messaging.Azure.Queues.Demo;
 
 public class RuntimeEnv
 {
+    public IAzureClientFactory<QueueServiceClient> Factory { get; }
     public readonly CancellationTokenSource Source;
     public readonly CancellationToken Token;
-    public readonly Encoding Encoding;
 
-    public static RuntimeEnv New() => new(new CancellationTokenSource(), Encoding.Default);
-
-    public RuntimeEnv(CancellationTokenSource source, Encoding encoding)
+    public RuntimeEnv(IAzureClientFactory<QueueServiceClient> factory)
     {
-        Source = source;
-        Token = source.Token;
-        Encoding = encoding;
+        Factory = factory;
+        Source = new CancellationTokenSource();
+        Token = Source.Token;
     }
 }

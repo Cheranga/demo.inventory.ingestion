@@ -8,11 +8,11 @@ using static LanguageExt.Prelude;
 
 namespace Infrastructure.Messaging.Azure.Queues.Demo;
 
-public class LiveQueueOperations : IQueueOperations
+internal class LiveQueueOperations : IQueueOperations
 {
     private readonly IAzureClientFactory<QueueServiceClient> _factory;
 
-    public LiveQueueOperations(IAzureClientFactory<QueueServiceClient> factory) =>
+    internal LiveQueueOperations(IAzureClientFactory<QueueServiceClient> factory) =>
         _factory = factory;
 
     public Aff<Unit> Publish(MessageOperation operation) =>

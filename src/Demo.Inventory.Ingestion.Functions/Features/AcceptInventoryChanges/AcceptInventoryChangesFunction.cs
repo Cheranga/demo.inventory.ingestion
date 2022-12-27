@@ -2,40 +2,34 @@
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Azure.Storage.Queues;
 using Demo.Inventory.Ingestion.Domain;
 using Demo.Inventory.Ingestion.Functions.Extensions;
 using FluentValidation;
 using Infrastructure.Messaging.Azure.Queues.Demo;
 using LanguageExt;
-using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Extensions.Azure;
 using Unit = LanguageExt.Unit;
 
 namespace Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
 
 public class AcceptInventoryChangesFunction
 {
-    private readonly IAzureClientFactory<QueueServiceClient> _factory;
-    private readonly IAcceptInventoryChangesHandler _handler;
-    private readonly IMediator _mediator;
+    private readonly RuntimeEnv _runTimeEnv;
+    private readonly IInventoryChangesHandler _handler;
     private readonly AcceptInventorySettings _settings;
     private readonly IValidator<AcceptInventoryChangeRequest> _validator;
 
     public AcceptInventoryChangesFunction(
-        IMediator mediator,
-        IAzureClientFactory<QueueServiceClient> factory,
+        RuntimeEnv runTimeEnv,
         IValidator<AcceptInventoryChangeRequest> validator,
         AcceptInventorySettings settings,
-        IAcceptInventoryChangesHandler handler
+        IInventoryChangesHandler handler
     )
     {
-        _mediator = mediator;
-        _factory = factory;
+        _runTimeEnv = runTimeEnv;
         _validator = validator;
         _settings = settings;
         _handler = handler;
@@ -53,13 +47,12 @@ public class AcceptInventoryChangesFunction
     {
         var addOrderRequest = await request.ToModelAsync<AcceptInventoryChangeRequest>();
         var operation = await _handler.Execute(
-            LiveQueueRunTime.New(_factory),
+            LiveQueueRunTime.New(_runTimeEnv),
             addOrderRequest,
             _validator,
             _settings,
             CancellationToken.None
         );
-        // var operation = await _mediator.Send(addOrderRequest);
 
         return ToResponse(operation);
     }

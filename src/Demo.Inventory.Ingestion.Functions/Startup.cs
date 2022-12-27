@@ -1,5 +1,4 @@
-﻿using Azure.Storage.Queues;
-using Demo.Inventory.Ingestion.Functions;
+﻿using Demo.Inventory.Ingestion.Functions;
 using Demo.Inventory.Ingestion.Functions.Extensions;
 using Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
 using FluentValidation;
@@ -10,7 +9,6 @@ using MediatR;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Azure.WebJobs.Host.Bindings;
-using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -108,17 +106,8 @@ public class Startup : FunctionsStartup
     private static void RegisterMessaging(IFunctionsHostBuilder builder)
     {
         var services = builder.Services;
-        services.AddSingleton<IMessagePublisher, AzureQueueStorageMessagePublisher>();
-
-        services.AddSingleton(
-            typeof(IHaveQueueOperations<LiveQueueRunTime>),
-            provider =>
-                LiveQueueRunTime.New(
-                    provider.GetRequiredService<IAzureClientFactory<QueueServiceClient>>()
-                )
-        );
-
-        services.AddSingleton<IAcceptInventoryChangesHandler, LiveInventoryChangesHandler>();
+        services.AddTransient(typeof(RuntimeEnv));
+        services.AddSingleton<IInventoryChangesHandler, InventoryChangesHandler>();
     }
 
     private static void RegisterLogging(IServiceCollection services)

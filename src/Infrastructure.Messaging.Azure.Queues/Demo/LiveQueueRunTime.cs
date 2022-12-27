@@ -1,7 +1,5 @@
-﻿using Azure.Storage.Queues;
-using LanguageExt;
+﻿using LanguageExt;
 using LanguageExt.Effects.Traits;
-using Microsoft.Extensions.Azure;
 using static LanguageExt.Prelude;
 
 namespace Infrastructure.Messaging.Azure.Queues.Demo;
@@ -10,21 +8,18 @@ public readonly struct LiveQueueRunTime
     : IHaveQueueOperations<LiveQueueRunTime>,
         HasCancel<LiveQueueRunTime>
 {
-    private readonly RuntimeEnv _env;
-    private readonly IAzureClientFactory<QueueServiceClient> _factory;
+    private RuntimeEnv Env { get; }
 
-    public LiveQueueRunTime(RuntimeEnv env, IAzureClientFactory<QueueServiceClient> factory)
+    private LiveQueueRunTime(RuntimeEnv env)
     {
-        _env = env;
-        _factory = factory;
+        Env = env;
     }
 
     public Aff<LiveQueueRunTime, IQueueOperations> QueueOperations =>
-        Eff<LiveQueueRunTime, IQueueOperations>(static rt => new LiveQueueOperations(rt._factory));
-    public LiveQueueRunTime LocalCancel => new(_env, _factory);
-    public CancellationToken CancellationToken => _env.Token;
-    public CancellationTokenSource CancellationTokenSource => _env.Source;
+        Eff<LiveQueueRunTime, IQueueOperations>(static rt => new LiveQueueOperations(rt.Env.Factory));
+    public LiveQueueRunTime LocalCancel => new(Env);
+    public CancellationToken CancellationToken => Env.Token;
+    public CancellationTokenSource CancellationTokenSource => Env.Source;
 
-    public static LiveQueueRunTime New(IAzureClientFactory<QueueServiceClient> factory) =>
-        new(RuntimeEnv.New(), factory);
+    public static LiveQueueRunTime New(RuntimeEnv env) => new(env);
 }
