@@ -1,7 +1,7 @@
 ﻿using LanguageExt;
 using LanguageExt.Effects.Traits;
 
-namespace Infrastructure.Messaging.Azure.Queues.Demo;
+namespace Infrastructure.Messaging.Azure.Queues;
 
 public static class QueueOperationsSchema<RT>
     where RT : struct, IHaveQueueOperations<RT>, HasCancel<RT>

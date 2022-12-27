@@ -4,7 +4,6 @@ using Demo.Inventory.Ingestion.Domain;
 using Demo.Inventory.Ingestion.Functions.Extensions;
 using FluentValidation;
 using Infrastructure.Messaging.Azure.Queues;
-using Infrastructure.Messaging.Azure.Queues.Demo;
 using LanguageExt;
 using LanguageExt.Effects.Traits;
 using Microsoft.Extensions.Logging;

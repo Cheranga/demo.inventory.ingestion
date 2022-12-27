@@ -1,6 +1,6 @@
 ﻿using LanguageExt.Common;
 
-namespace Infrastructure.Messaging.Azure.Queues.Demo;
+namespace Infrastructure.Messaging.Azure.Queues;
 
 public class MessagePublishException : Exception
 {

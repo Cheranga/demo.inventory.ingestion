@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.Messaging.Azure.Queues.Demo;
+﻿namespace Infrastructure.Messaging.Azure.Queues;
 
 public record MessageOperation(
     string CorrelationId,

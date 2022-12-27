@@ -2,7 +2,7 @@
 using LanguageExt.Effects.Traits;
 using static LanguageExt.Prelude;
 
-namespace Infrastructure.Messaging.Azure.Queues.Demo;
+namespace Infrastructure.Messaging.Azure.Queues;
 
 public readonly struct LiveQueueRunTime
     : IHaveQueueOperations<LiveQueueRunTime>,

@@ -6,7 +6,7 @@ using LanguageExt.Common;
 using Microsoft.Extensions.Azure;
 using static LanguageExt.Prelude;
 
-namespace Infrastructure.Messaging.Azure.Queues.Demo;
+namespace Infrastructure.Messaging.Azure.Queues;
 
 internal class LiveQueueOperations : IQueueOperations
 {

@@ -5,7 +5,7 @@ using System.Web.Http;
 using Demo.Inventory.Ingestion.Domain;
 using Demo.Inventory.Ingestion.Functions.Extensions;
 using FluentValidation;
-using Infrastructure.Messaging.Azure.Queues.Demo;
+using Infrastructure.Messaging.Azure.Queues;
 using LanguageExt;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

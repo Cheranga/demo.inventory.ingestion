@@ -4,7 +4,6 @@ using Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
 using FluentValidation;
 using Infrastructure.Messaging.Azure.Blobs;
 using Infrastructure.Messaging.Azure.Queues;
-using Infrastructure.Messaging.Azure.Queues.Demo;
 using MediatR;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
