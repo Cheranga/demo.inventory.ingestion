@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="BunsenBurner" Version="1.6.2" />
+        <PackageReference Include="BunsenBurner.FunctionApp" Version="5.2.0" />
         <PackageReference Include="FluentAssertions" Version="6.8.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
         <PackageReference Include="Moq" Version="4.18.3" />
@@ -26,10 +26,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\Demo.Inventory.Ingestion.Functions\Demo.Inventory.Ingestion.Functions.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Infrastructure\Demo\Queues" />
     </ItemGroup>
 
     <ItemGroup>

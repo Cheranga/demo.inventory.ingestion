@@ -11,6 +11,6 @@ public static class MockedLoggerExtensions
             It.IsAny<EventId>(),
             It.IsAny<object>(),
             It.IsAny<Exception>(),
-            It.IsAny<Func<object, Exception, string>>()), times);
+            It.IsAny<Func<object, Exception, string>>()!), times);
     }
 }

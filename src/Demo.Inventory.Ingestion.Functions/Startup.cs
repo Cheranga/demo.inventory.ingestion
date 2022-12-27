@@ -106,7 +106,7 @@ public class Startup : FunctionsStartup
     private static void RegisterMessaging(IFunctionsHostBuilder builder)
     {
         var services = builder.Services;
-        services.AddTransient(typeof(RuntimeEnv));
+        services.AddTransient(typeof(AzureStorageQueueRuntimeEnv));
         services.AddSingleton<IInventoryChangesHandler, InventoryChangesHandler>();
     }
 

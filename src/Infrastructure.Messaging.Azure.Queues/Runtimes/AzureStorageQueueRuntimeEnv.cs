@@ -3,13 +3,13 @@ using Microsoft.Extensions.Azure;
 
 namespace Infrastructure.Messaging.Azure.Queues.Runtimes;
 
-public class RuntimeEnv
+public class AzureStorageQueueRuntimeEnv
 {
     public IAzureClientFactory<QueueServiceClient> Factory { get; }
     public readonly CancellationTokenSource Source;
     public readonly CancellationToken Token;
 
-    public RuntimeEnv(IAzureClientFactory<QueueServiceClient> factory)
+    public AzureStorageQueueRuntimeEnv(IAzureClientFactory<QueueServiceClient> factory)
     {
         Factory = factory;
         Source = new CancellationTokenSource();

@@ -33,13 +33,10 @@ public class InventoryChangesHandler : IInventoryChangesHandler
             await (
                 from _ in validator.ValidateAff(request, _logger, token)
                 from __ in QueueOperationsSchema<TRunTime>.Publish(
-                    new MessageOperation(
-                        request.CorrelationId,
-                        settings.Category,
-                        settings.Queue,
-                        MessageSettings.DefaultSettings,
-                        () => request.ToJson()
-                    )
+                    request.CorrelationId,
+                    settings.Category,
+                    settings.Queue,
+                    () => request.ToJson()
                 )
                 select __
             ).Run(runTime)

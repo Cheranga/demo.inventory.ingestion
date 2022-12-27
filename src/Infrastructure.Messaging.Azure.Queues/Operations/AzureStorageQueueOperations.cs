@@ -10,11 +10,11 @@ using static LanguageExt.Prelude;
 
 namespace Infrastructure.Messaging.Azure.Queues.Operations;
 
-internal class LiveQueueOperations : IQueueOperations
+internal class AzureStorageQueueOperations : IQueueOperations
 {
     private readonly IAzureClientFactory<QueueServiceClient> _factory;
 
-    internal LiveQueueOperations(IAzureClientFactory<QueueServiceClient> factory) =>
+    internal AzureStorageQueueOperations(IAzureClientFactory<QueueServiceClient> factory) =>
         _factory = factory;
 
     public Aff<Unit> Publish(MessageOperation operation) =>
