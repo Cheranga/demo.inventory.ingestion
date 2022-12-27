@@ -1,8 +1,10 @@
-﻿using Azure.Storage.Queues;
+﻿using System.Diagnostics.CodeAnalysis;
+using Azure.Storage.Queues;
 using Microsoft.Extensions.Azure;
 
 namespace Infrastructure.Messaging.Azure.Queues.Runtimes;
 
+[ExcludeFromCodeCoverage(Justification = "no specific logic to test")]
 public class AzureStorageQueueRuntimeEnv
 {
     public IAzureClientFactory<QueueServiceClient> Factory { get; }

@@ -1,5 +1,8 @@
-﻿namespace Infrastructure.Messaging.Azure.Queues;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace Infrastructure.Messaging.Azure.Queues;
+
+[ExcludeFromCodeCoverage(Justification = "no specific logic to test")]
 public class ErrorCodes
 {
     public const int QueueServiceClientNotFound = 500;
@@ -9,6 +12,7 @@ public class ErrorCodes
     public const int UnableToPublishWithProvidedMessageSettings = 504;
 }
 
+[ExcludeFromCodeCoverage(Justification = "no specific logic to test")]
 public class ErrorMessages
 {
     public const string QueueServiceClientNotFound = "unregistered queue service client";

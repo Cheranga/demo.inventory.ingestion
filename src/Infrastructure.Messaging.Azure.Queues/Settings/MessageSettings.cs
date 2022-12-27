@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Infrastructure.Messaging.Azure.Queues.Settings;
 
+[ExcludeFromCodeCoverage(Justification = "no specific logic to test")]
 public record MessageSettings
 {
     private MessageSettings(TimeSpan visibility, TimeSpan timeToLive)

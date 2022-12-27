@@ -1,4 +1,5 @@
-﻿using LanguageExt;
+﻿using System.Diagnostics.CodeAnalysis;
+using LanguageExt;
 
 namespace Infrastructure.Messaging.Azure.Queues.Operations;
 

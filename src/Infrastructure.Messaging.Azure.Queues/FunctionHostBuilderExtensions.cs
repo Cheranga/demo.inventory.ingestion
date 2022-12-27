@@ -1,4 +1,5 @@
-﻿using Azure.Identity;
+﻿using System.Diagnostics.CodeAnalysis;
+using Azure.Identity;
 using Azure.Storage.Queues;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Azure;
@@ -6,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Messaging.Azure.Queues;
 
+[ExcludeFromCodeCoverage(Justification = "no specific logic to test")]
 public static class FunctionHostBuilderExtensions
 {
     public static void RegisterQueueServiceClient(
