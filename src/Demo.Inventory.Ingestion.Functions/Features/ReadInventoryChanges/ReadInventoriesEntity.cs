@@ -43,7 +43,7 @@ public class ReadInventoriesEntity : IReadInventoryEntity, IActor
     private Either<ErrorResponse, List<Domain.Inventory>> _operation = Either<
         ErrorResponse,
         List<Domain.Inventory>
-    >.Left(ErrorResponse.ToError(404, "no data found"));
+    >.Left(ErrorResponse.New(404, "no data found"));
 
     public ReadInventoriesEntity(
         DestinationInventorySettings settings,

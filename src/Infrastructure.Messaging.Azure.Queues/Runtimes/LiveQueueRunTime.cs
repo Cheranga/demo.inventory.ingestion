@@ -1,8 +1,9 @@
-﻿using LanguageExt;
+﻿using Infrastructure.Messaging.Azure.Queues.Operations;
+using LanguageExt;
 using LanguageExt.Effects.Traits;
 using static LanguageExt.Prelude;
 
-namespace Infrastructure.Messaging.Azure.Queues;
+namespace Infrastructure.Messaging.Azure.Queues.Runtimes;
 
 public readonly struct LiveQueueRunTime
     : IHaveQueueOperations<LiveQueueRunTime>,

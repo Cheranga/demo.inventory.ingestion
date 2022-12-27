@@ -1,6 +1,6 @@
 ﻿using LanguageExt;
 
-namespace Infrastructure.Messaging.Azure.Queues;
+namespace Infrastructure.Messaging.Azure.Queues.Operations;
 
 public interface IQueueOperations
 {

@@ -6,9 +6,9 @@ using TestIngestionConsole;
 var host = CreateHostBuilder(args).Build();
 var inventoryService = host.Services.GetRequiredService<IInventoryService>();
 
-var limit = 100;
+var limit = 10;
 var request = new SendInventoryEventRequest("999", "AU_10.csv");
-var requests = Seq.generate(limit, _ => inventoryService.SendInventoryEvent(request)); // Enumerable.Range(1, limit).Select(x => inventoryService.SendInventoryEvent(request));
+var requests = Seq.generate(limit, _ => inventoryService.SendInventoryEvent(request));
 await requests.SequenceParallel(x => x).ContinueWith(_ =>
 {
     Console.ForegroundColor = ConsoleColor.Cyan;

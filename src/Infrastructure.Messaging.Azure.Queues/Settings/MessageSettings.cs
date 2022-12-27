@@ -1,4 +1,4 @@
-namespace Infrastructure.Messaging.Azure.Queues;
+namespace Infrastructure.Messaging.Azure.Queues.Settings;
 
 public record MessageSettings
 {

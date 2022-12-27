@@ -4,39 +4,43 @@ namespace Demo.Inventory.Ingestion.Domain;
 
 public class ErrorResponse
 {
-    public int ErrorCode { get; set; }
-    public string ErrorMessage { get; set; }
-    public List<ErrorData> Errors { get; set; } = new();
+    public int ErrorCode { get; }
+    public string ErrorMessage { get; }
+    public List<ErrorData> Errors { get; }
 
-    public class ErrorData
+    private ErrorResponse(int errorCode, string errorMessage, IEnumerable<ErrorData> errors)
     {
-        public string ErrorCode { get; set; }
-        public string ErrorMessage { get; set; }
+        ErrorCode = errorCode;
+        ErrorMessage = errorMessage;
+        Errors = errors?.ToList() ?? new List<ErrorData>();
     }
 
-    public static ErrorResponse ToError(int errorCode, string errorMessage) =>
-        ToError(
-            errorCode,
-            errorMessage,
-            new[]
-            {
-                new ValidationFailure { ErrorCode = "", ErrorMessage = "error occurred" }
-            }
-        );
+    public static ErrorResponse New(int errorCode, string errorMessage) =>
+        new(errorCode, errorMessage, new[] { ErrorData.New("", "error occurred") });
 
-    public static ErrorResponse ToError(
+    public static ErrorResponse New(
         int errorCode,
         string errorMessage,
         IEnumerable<ValidationFailure> errors
     ) =>
-        new()
+        new(
+            errorCode,
+            errorMessage,
+            errors.Select(x => ErrorData.New(x.PropertyName, x.ErrorMessage))
+        );
+
+    public class ErrorData
+    {
+        public string ErrorCode { get; }
+        public string ErrorMessage { get; }
+
+        private ErrorData(string errorCode, string errorMessage)
         {
-            ErrorCode = errorCode,
-            ErrorMessage = errorMessage,
-            Errors = errors
-                .Select(
-                    x => new ErrorData { ErrorCode = x.PropertyName, ErrorMessage = x.ErrorMessage }
-                )
-                .ToList()
-        };
+            ErrorCode = errorCode;
+            ErrorMessage = errorMessage;
+        }
+
+        public static ErrorData New(string errorCode, string errorMessage) =>
+            new(errorCode, errorMessage);
+    }
 }

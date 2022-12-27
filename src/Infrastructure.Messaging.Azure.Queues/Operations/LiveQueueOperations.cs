@@ -1,12 +1,14 @@
 ﻿using Azure;
 using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
+using Infrastructure.Messaging.Azure.Queues.Exceptions;
+using Infrastructure.Messaging.Azure.Queues.Settings;
 using LanguageExt;
 using LanguageExt.Common;
 using Microsoft.Extensions.Azure;
 using static LanguageExt.Prelude;
 
-namespace Infrastructure.Messaging.Azure.Queues;
+namespace Infrastructure.Messaging.Azure.Queues.Operations;
 
 internal class LiveQueueOperations : IQueueOperations
 {

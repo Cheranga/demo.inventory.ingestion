@@ -1,7 +1,7 @@
 ﻿using Azure.Storage.Queues;
 using Microsoft.Extensions.Azure;
 
-namespace Infrastructure.Messaging.Azure.Queues;
+namespace Infrastructure.Messaging.Azure.Queues.Runtimes;
 
 public class RuntimeEnv
 {

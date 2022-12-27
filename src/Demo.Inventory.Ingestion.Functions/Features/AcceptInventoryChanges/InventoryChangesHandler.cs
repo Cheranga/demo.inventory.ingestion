@@ -4,6 +4,8 @@ using Demo.Inventory.Ingestion.Domain;
 using Demo.Inventory.Ingestion.Functions.Extensions;
 using FluentValidation;
 using Infrastructure.Messaging.Azure.Queues;
+using Infrastructure.Messaging.Azure.Queues.Operations;
+using Infrastructure.Messaging.Azure.Queues.Settings;
 using LanguageExt;
 using LanguageExt.Effects.Traits;
 using Microsoft.Extensions.Logging;
@@ -60,12 +62,12 @@ public class InventoryChangesHandler : IInventoryChangesHandler
                 );
                 return Left<ErrorResponse, Unit>(
                     error.ToException() is ValidationException
-                        ? ErrorResponse.ToError(
+                        ? ErrorResponse.New(
                             ErrorCodes.InvalidData,
                             ErrorMessages.InvalidData,
                             ((ValidationException)error.ToException()).Errors
                         )
-                        : ErrorResponse.ToError(error.Code, error.Message)
+                        : ErrorResponse.New(error.Code, error.Message)
                 );
             }
         );
