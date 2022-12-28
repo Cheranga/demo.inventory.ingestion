@@ -11,10 +11,12 @@ public class AzureStorageQueueRuntimeEnv
     public readonly CancellationTokenSource Source;
     public readonly CancellationToken Token;
 
-    public AzureStorageQueueRuntimeEnv(IAzureClientFactory<QueueServiceClient> factory)
+    private AzureStorageQueueRuntimeEnv(IAzureClientFactory<QueueServiceClient> factory)
     {
         Factory = factory;
         Source = new CancellationTokenSource();
         Token = Source.Token;
     }
+
+    public static AzureStorageQueueRuntimeEnv New(IAzureClientFactory<QueueServiceClient> factory) => new(factory);
 }

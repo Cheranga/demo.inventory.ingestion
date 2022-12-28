@@ -18,19 +18,19 @@ namespace Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
 
 public class AcceptInventoryChangesFunction
 {
-    private readonly AzureStorageQueueRuntimeEnv _runTimeEnv;
+    private readonly AzureStorageQueueRunTime _runTime;
     private readonly IInventoryChangesHandler _handler;
     private readonly AcceptInventorySettings _settings;
     private readonly IValidator<AcceptInventoryChangeRequest> _validator;
 
     public AcceptInventoryChangesFunction(
-        AzureStorageQueueRuntimeEnv runTimeEnv,
+        AzureStorageQueueRunTime runTime,
         IValidator<AcceptInventoryChangeRequest> validator,
         AcceptInventorySettings settings,
         IInventoryChangesHandler handler
     )
     {
-        _runTimeEnv = runTimeEnv;
+        _runTime = runTime;
         _validator = validator;
         _settings = settings;
         _handler = handler;
@@ -48,7 +48,7 @@ public class AcceptInventoryChangesFunction
     {
         var addOrderRequest = await request.ToModelAsync<AcceptInventoryChangeRequest>();
         var operation = await _handler.Execute(
-            AzureStorageQueueRunTime.New(_runTimeEnv),
+            _runTime,
             addOrderRequest,
             _validator,
             _settings,

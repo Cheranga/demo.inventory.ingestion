@@ -1,11 +1,10 @@
-﻿using Demo.Inventory.Ingestion.Functions;
+﻿using System;
+using Demo.Inventory.Ingestion.Functions;
 using Demo.Inventory.Ingestion.Functions.Extensions;
 using Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
 using FluentValidation;
 using Infrastructure.Messaging.Azure.Blobs;
 using Infrastructure.Messaging.Azure.Queues;
-using Infrastructure.Messaging.Azure.Queues.Runtimes;
-using MediatR;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Azure.WebJobs.Host.Bindings;
@@ -25,14 +24,16 @@ public class Startup : FunctionsStartup
     {
         var configuration = GetConfiguration(builder);
 
-        RegisterSettings(builder, configuration);
-        RegisterAzureClients(builder, configuration);
-        RegisterMessaging(builder);
+        RegisterSettings(builder.Services, configuration);
+        RegisterBlobServices(builder, configuration);
+        RegisterQueueServices(builder, configuration);
+        RegisterCustomServices(builder.Services);
         RegisterLogging(builder.Services);
-
-        builder.Services.AddValidatorsFromAssembly(typeof(Startup).Assembly);
-        builder.Services.AddMediatR(typeof(Startup).Assembly);
+        RegisterValidator(builder.Services);
     }
+
+    private static void RegisterValidator(IServiceCollection services) =>
+        services.AddValidatorsFromAssembly(typeof(Startup).Assembly);
 
     protected virtual IConfiguration GetConfiguration(IFunctionsHostBuilder builder)
     {
@@ -48,36 +49,29 @@ public class Startup : FunctionsStartup
             .Build();
     }
 
-    private static void RegisterSettings(
-        IFunctionsHostBuilder builder,
-        IConfiguration configuration
-    )
+    private static void RegisterSettings(IServiceCollection services, IConfiguration configuration)
     {
-        builder.Services.RegisterFromConfiguration<AcceptInventorySettings>(
+        services.RegisterFromConfiguration<AcceptInventorySettings>(
             configuration,
             ServiceLifetime.Singleton
         );
 
-        builder.Services.RegisterFromConfiguration<SourceInventorySettings>(
+        services.RegisterFromConfiguration<SourceInventorySettings>(
             configuration,
             ServiceLifetime.Singleton
         );
 
-        builder.Services.RegisterFromConfiguration<DestinationInventorySettings>(
+        services.RegisterFromConfiguration<DestinationInventorySettings>(
             configuration,
             ServiceLifetime.Singleton
         );
     }
 
-    private static void RegisterAzureClients(
+    private static void RegisterBlobServices(
         IFunctionsHostBuilder builder,
         IConfiguration configuration
     )
     {
-        var addOrderSettings = configuration
-            .GetSection(nameof(AcceptInventorySettings))
-            .Get<AcceptInventorySettings>();
-
         var sourceInventorySettings = configuration
             .GetSection(nameof(SourceInventorySettings))
             .Get<SourceInventorySettings>();
@@ -86,11 +80,6 @@ public class Startup : FunctionsStartup
             .GetSection(nameof(DestinationInventorySettings))
             .Get<DestinationInventorySettings>();
 
-        builder.RegisterQueueServiceClient(
-            configuration,
-            addOrderSettings.Account,
-            addOrderSettings.Category
-        );
         builder.RegisterBlobServiceClient(
             configuration,
             sourceInventorySettings.Account,
@@ -103,15 +92,39 @@ public class Startup : FunctionsStartup
         );
     }
 
-    private static void RegisterMessaging(IFunctionsHostBuilder builder)
+    private static void RegisterQueueServices(
+        IFunctionsHostBuilder builder,
+        IConfiguration configuration
+    )
     {
-        var services = builder.Services;
-        services.AddTransient(typeof(AzureStorageQueueRuntimeEnv));
-        services.AddSingleton<IInventoryChangesHandler, InventoryChangesHandler>();
+        var addOrderSettings = configuration
+            .GetSection(nameof(AcceptInventorySettings))
+            .Get<AcceptInventorySettings>();
+
+        var environment = configuration.GetValue<string>("Environment");
+        var isLocal = string.Equals(environment, "local", StringComparison.OrdinalIgnoreCase);
+
+        if (isLocal)
+        {
+            builder.Services
+                .RegisterLiveQueueRunTime()
+                .RegisterQueuesWithConnectionString(
+                    (addOrderSettings.Account, addOrderSettings.Category)
+                );
+            return;
+        }
+
+        builder.Services
+            .RegisterLiveQueueRunTime()
+            .RegisterQueuesWithManagedIdentity(
+                (addOrderSettings.Account, addOrderSettings.Category)
+            );
     }
 
-    private static void RegisterLogging(IServiceCollection services)
-    {
+    private static void RegisterCustomServices(IServiceCollection services) =>
+        services.AddSingleton<IInventoryChangesHandler, InventoryChangesHandler>();
+
+    private static void RegisterLogging(IServiceCollection services) =>
         services.AddLogging(builder =>
         {
             var logger = new LoggerConfiguration().MinimumLevel
@@ -133,5 +146,4 @@ public class Startup : FunctionsStartup
 
             builder.AddSerilog(logger);
         });
-    }
 }
