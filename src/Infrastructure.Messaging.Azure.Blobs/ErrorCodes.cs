@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.Messaging.Azure.Blobs.Operations;
+﻿namespace Infrastructure.Messaging.Azure.Blobs;
 
 public class ErrorCodes
 {

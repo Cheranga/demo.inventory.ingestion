@@ -1,4 +1,4 @@
-namespace Infrastructure.Messaging.Azure.Blobs;
+namespace Infrastructure.Messaging.Azure.Blobs.Requests;
 
 public record struct ReadFileRequest(
     string CorrelationId,

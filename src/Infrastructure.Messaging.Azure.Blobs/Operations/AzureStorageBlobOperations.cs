@@ -1,7 +1,11 @@
-﻿using Azure;
+﻿using System.Globalization;
+using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using CsvHelper;
+using CsvHelper.Configuration;
 using Infrastructure.Messaging.Azure.Blobs.Exceptions;
+using Infrastructure.Messaging.Azure.Blobs.Requests;
 using LanguageExt;
 using LanguageExt.Common;
 using Microsoft.Extensions.Azure;
@@ -31,6 +35,26 @@ public class AzureStorageBlobOperations : IBlobOperations
                     )
                     : unit
         );
+
+    public Aff<List<TData>> ReadDataFromCsv<TData, TDataMap>(ReadFileRequest request)
+        where TDataMap : ClassMap<TData> =>
+        from blobServiceClient in Eff(() => _factory.CreateClient(request.Category))
+        from blobContainerClient in Eff(
+            () => blobServiceClient.GetBlobContainerClient(request.Container)
+        )
+        from blobClient in Eff(() => blobContainerClient.GetBlobClient(request.FileName))
+        from response in Aff(async () =>
+        {
+            using var stream = new MemoryStream();
+            await blobClient.DownloadToAsync(stream);
+            stream.Position = 0;
+
+            using var streamReader = new StreamReader(stream);
+            using var csvReader = new CsvReader(streamReader, CultureInfo.InvariantCulture);
+            csvReader.Context.RegisterClassMap<TDataMap>();
+            return csvReader.GetRecords<TData>().ToList();
+        })
+        select response;
 
     public static AzureStorageBlobOperations New(IAzureClientFactory<BlobServiceClient> factory) =>
         new(factory);
@@ -78,7 +102,7 @@ public class AzureStorageBlobOperations : IBlobOperations
         string content
     ) =>
         AffMaybe<Response<BlobContentInfo>>(
-                async () => await blobClient.UploadAsync(BinaryData.FromString(content))
+                async () => await blobClient.UploadAsync(BinaryData.FromString(content), true)
             )
             .MapFail(
                 error => Error.New(ErrorCodes.CannotUpload, ErrorMessages.CannotUpload, error)

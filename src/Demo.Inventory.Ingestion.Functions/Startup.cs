@@ -80,16 +80,29 @@ public class Startup : FunctionsStartup
             .GetSection(nameof(DestinationInventorySettings))
             .Get<DestinationInventorySettings>();
 
-        builder.RegisterBlobServiceClient(
-            configuration,
-            sourceInventorySettings.Account,
-            sourceInventorySettings.Category
-        );
-        builder.RegisterBlobServiceClient(
-            configuration,
-            destinationInventorySettings.Account,
-            destinationInventorySettings.Category
-        );
+        var isLocal = IsLocal(configuration);
+
+        if (isLocal)
+        {
+            builder.Services
+                .RegisterLiveBlobRunTime()
+                .RegisterBlobsWithConnectionString(
+                    (sourceInventorySettings.Account, sourceInventorySettings.Category)
+                )
+                .RegisterBlobsWithConnectionString(
+                    (destinationInventorySettings.Account, destinationInventorySettings.Category)
+                );
+            return;
+        }
+
+        builder.Services
+            .RegisterLiveBlobRunTime()
+            .RegisterBlobsWithManagedIdentity(
+                (sourceInventorySettings.Account, sourceInventorySettings.Category)
+            )
+            .RegisterBlobsWithManagedIdentity(
+                (destinationInventorySettings.Account, destinationInventorySettings.Category)
+            );
     }
 
     private static void RegisterQueueServices(
@@ -101,8 +114,7 @@ public class Startup : FunctionsStartup
             .GetSection(nameof(AcceptInventorySettings))
             .Get<AcceptInventorySettings>();
 
-        var environment = configuration.GetValue<string>("Environment");
-        var isLocal = string.Equals(environment, "local", StringComparison.OrdinalIgnoreCase);
+        var isLocal = IsLocal(configuration);
 
         if (isLocal)
         {
@@ -119,6 +131,13 @@ public class Startup : FunctionsStartup
             .RegisterQueuesWithManagedIdentity(
                 (addOrderSettings.Account, addOrderSettings.Category)
             );
+    }
+
+    private static bool IsLocal(IConfiguration configuration)
+    {
+        var environment = configuration.GetValue<string>("Environment");
+        var isLocal = string.Equals(environment, "local", StringComparison.OrdinalIgnoreCase);
+        return isLocal;
     }
 
     private static void RegisterCustomServices(IServiceCollection services) =>

@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Demo.Inventory.Ingestion.Domain;
 using FluentValidation;
-using Infrastructure.Messaging.Azure.Queues;
 using Infrastructure.Messaging.Azure.Queues.Operations;
 using LanguageExt;
 using LanguageExt.Effects.Traits;

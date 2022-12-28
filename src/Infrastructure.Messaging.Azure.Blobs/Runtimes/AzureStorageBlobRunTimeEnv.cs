@@ -1,7 +1,7 @@
 ﻿using Azure.Storage.Blobs;
 using Microsoft.Extensions.Azure;
 
-namespace Infrastructure.Messaging.Azure.Blobs.Operations;
+namespace Infrastructure.Messaging.Azure.Blobs.Runtimes;
 
 public class AzureStorageBlobRunTimeEnv
 {

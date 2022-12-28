@@ -1,48 +1,67 @@
 ﻿using Azure.Identity;
-using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+using Azure.Storage.Blobs;
+using Infrastructure.Messaging.Azure.Blobs.Runtimes;
 using Microsoft.Extensions.Azure;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Messaging.Azure.Blobs;
 
 public static class FunctionHostBuilderExtensions
 {
-    public static bool IsNonProd(this IFunctionsHostBuilder builder)
-    {
-        var environmentName = builder.GetContext().EnvironmentName;
-        return !(
-            string.Equals("staging", environmentName, StringComparison.OrdinalIgnoreCase)
-            || string.Equals("production", environmentName, StringComparison.OrdinalIgnoreCase)
-        );
-    }
-
-    public static void RegisterBlobServiceClient(
-        this IFunctionsHostBuilder builder,
-        IConfiguration configuration,
-        string account,
-        string name
+    public static IServiceCollection RegisterBlobsWithManagedIdentity(
+        this IServiceCollection services,
+        params (string account, string name)[] blobSettings
     )
     {
-        var environment = configuration.GetValue<string>("Environment");
-        var isLocal = string.Equals(environment, "local", StringComparison.OrdinalIgnoreCase);
+        var blobSettingsList =
+            blobSettings?.ToList() ?? new List<(string account, string name)>();
 
-        builder.Services.AddAzureClients(clientBuilder =>
+        blobSettingsList.ForEach(x =>
         {
-            var queueBuilder = (
-                isLocal
-                    ? clientBuilder.AddBlobServiceClient(account)
-                    : clientBuilder.AddBlobServiceClient(
-                        new Uri($"https://{account}.blob.core.windows.net")
-                    )
-            ).WithName(name);
-
-            if (!builder.IsNonProd())
+            services.AddAzureClients(clientBuilder =>
             {
-                queueBuilder.WithCredential(new ManagedIdentityCredential());
-            }
+                clientBuilder
+                    .AddBlobServiceClient(new Uri($"https://{x.account}.blob.core.windows.net"))
+                    .WithName(x.name)
+                    .WithCredential(new ManagedIdentityCredential());
+            });
         });
 
-        builder.Services.AddSingleton<IBlobManager, AzureStorageBlobManager>();
+        return services;
+    }
+    
+    public static IServiceCollection RegisterBlobsWithConnectionString(
+        this IServiceCollection services,
+        params (string connectionString, string name)[] blobSettings
+    )
+    {
+        var blobSettingsList =
+            blobSettings?.ToList() ?? new List<(string account, string name)>();
+
+        blobSettingsList.ForEach(x =>
+        {
+            services.AddAzureClients(clientBuilder =>
+            {
+                clientBuilder
+                    .AddBlobServiceClient(x.connectionString)
+                    .WithName(x.name);
+            });
+        });
+
+        return services;
+    }
+    
+    public static IServiceCollection RegisterLiveBlobRunTime(this IServiceCollection services)
+    {
+        services.AddTransient(
+            typeof(AzureStorageBlobRunTime),
+            provider =>
+                AzureStorageBlobRunTime.New(
+                    AzureStorageBlobRunTimeEnv.New(
+                        provider.GetRequiredService<IAzureClientFactory<BlobServiceClient>>()
+                    )
+                )
+        );
+        return services;
     }
 }

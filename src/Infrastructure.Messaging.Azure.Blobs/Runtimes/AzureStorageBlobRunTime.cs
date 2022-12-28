@@ -1,8 +1,9 @@
-﻿using LanguageExt;
+﻿using Infrastructure.Messaging.Azure.Blobs.Operations;
+using LanguageExt;
 using LanguageExt.Effects.Traits;
 using static LanguageExt.Prelude;
 
-namespace Infrastructure.Messaging.Azure.Blobs.Operations;
+namespace Infrastructure.Messaging.Azure.Blobs.Runtimes;
 
 public readonly struct AzureStorageBlobRunTime
     : IHaveBlobOperations<AzureStorageBlobRunTime>,
