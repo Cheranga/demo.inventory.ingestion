@@ -97,7 +97,7 @@ public class AzureStorageBlobOperations : IBlobOperations
                     Error.New(ErrorCodes.CannotGetBlobClient, ErrorMessages.CannotGetBlobClient)
             );
 
-    private static Aff<Response<BlobContentInfo>> UploadContent(
+    private static Aff<Response<BlobContentInfo>>UploadContent(
         BlobClient blobClient,
         string content
     ) =>

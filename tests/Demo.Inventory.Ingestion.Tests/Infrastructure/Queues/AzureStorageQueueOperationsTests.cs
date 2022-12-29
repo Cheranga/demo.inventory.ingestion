@@ -12,7 +12,7 @@ using Microsoft.Extensions.Azure;
 using Moq;
 using static BunsenBurner.Aaa;
 
-namespace Demo.Inventory.Ingestion.Tests.Infrastructure.Demo.Queues;
+namespace Demo.Inventory.Ingestion.Tests.Infrastructure.Queues;
 
 public class DummySendReceiptResponse : Response<SendReceipt>
 {

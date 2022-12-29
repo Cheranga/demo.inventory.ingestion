@@ -2,7 +2,7 @@
 using LanguageExt;
 using LanguageExt.Effects.Traits;
 
-namespace Demo.Inventory.Ingestion.Tests.Infrastructure.Demo.FileIO;
+namespace Demo.Inventory.Ingestion.Tests.Infrastructure.FileIO;
 
 public readonly struct TestFileRunTime : IHaveFileOperations<TestFileRunTime>, HasCancel<TestFileRunTime>
 {

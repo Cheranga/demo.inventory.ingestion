@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using LanguageExt;
 
-namespace Demo.Inventory.Ingestion.Tests.Infrastructure.Demo.FileIO;
+namespace Demo.Inventory.Ingestion.Tests.Infrastructure.FileIO;
 
 public static class FileIOTests
 {

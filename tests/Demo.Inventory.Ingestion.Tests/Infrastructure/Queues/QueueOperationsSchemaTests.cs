@@ -1,12 +1,9 @@
-﻿using BunsenBurner.FunctionApp;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Infrastructure.Messaging.Azure.Queues.Operations;
 using Infrastructure.Messaging.Azure.Queues.Runtimes;
 using Infrastructure.Messaging.Azure.Queues.Settings;
-using static BunsenBurner.Aaa;
-using LanguageExt;
 
-namespace Demo.Inventory.Ingestion.Tests.Infrastructure.Demo.Queues;
+namespace Demo.Inventory.Ingestion.Tests.Infrastructure.Queues;
 
 public class QueueOperationsSchemaTests
 {

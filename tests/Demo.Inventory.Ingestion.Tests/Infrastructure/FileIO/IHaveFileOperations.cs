@@ -1,7 +1,7 @@
 ﻿using LanguageExt;
 using LanguageExt.Effects.Traits;
 
-namespace Demo.Inventory.Ingestion.Tests.Infrastructure.Demo.FileIO;
+namespace Demo.Inventory.Ingestion.Tests.Infrastructure.FileIO;
 
 public interface IHaveFileOperations<RT> where RT : struct, HasCancel<RT>
 {

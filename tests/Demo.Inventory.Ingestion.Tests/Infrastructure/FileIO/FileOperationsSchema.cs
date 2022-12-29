@@ -1,7 +1,7 @@
 ﻿using LanguageExt;
 using LanguageExt.Effects.Traits;
 
-namespace Demo.Inventory.Ingestion.Tests.Infrastructure.Demo.FileIO;
+namespace Demo.Inventory.Ingestion.Tests.Infrastructure.FileIO;
 
 public static class FileOperationsSchema<RT>
     where RT : struct, IHaveFileOperations<RT>, HasCancel<RT>

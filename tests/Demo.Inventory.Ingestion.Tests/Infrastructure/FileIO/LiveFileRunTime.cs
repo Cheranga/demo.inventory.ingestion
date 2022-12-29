@@ -3,7 +3,7 @@ using LanguageExt;
 using LanguageExt.Effects.Traits;
 using static LanguageExt.Prelude;
 
-namespace Demo.Inventory.Ingestion.Tests.Infrastructure.Demo.FileIO;
+namespace Demo.Inventory.Ingestion.Tests.Infrastructure.FileIO;
 
 public readonly struct LiveFileRunTime : IHaveFileOperations<LiveFileRunTime>, HasCancel<LiveFileRunTime>
 {
