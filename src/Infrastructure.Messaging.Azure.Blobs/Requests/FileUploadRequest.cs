@@ -1,5 +1,8 @@
-﻿namespace Infrastructure.Messaging.Azure.Blobs.Requests;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace Infrastructure.Messaging.Azure.Blobs.Requests;
+
+[ExcludeFromCodeCoverage]
 public record struct FileUploadRequest(
     string CorrelationId,
     string Category,

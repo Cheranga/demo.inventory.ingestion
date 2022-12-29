@@ -4,7 +4,6 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using CsvHelper;
 using CsvHelper.Configuration;
-using Infrastructure.Messaging.Azure.Blobs.Exceptions;
 using Infrastructure.Messaging.Azure.Blobs.Requests;
 using LanguageExt;
 using LanguageExt.Common;
@@ -27,14 +26,7 @@ public class AzureStorageBlobOperations : IBlobOperations
             from bc in GetBlobClient(bcc, request.FileName)
             from response in UploadContent(bc, request.Content)
             select response
-        ).Map(
-            response =>
-                response.GetRawResponse().IsError
-                    ? throw new UploadFileException(
-                        Error.New(ErrorCodes.CannotUpload, response.GetRawResponse().ReasonPhrase)
-                    )
-                    : unit
-        );
+        ).Map(_ => unit);
 
     public Aff<List<TData>> ReadDataFromCsv<TData, TDataMap>(ReadFileRequest request)
         where TDataMap : ClassMap<TData> =>
@@ -97,14 +89,18 @@ public class AzureStorageBlobOperations : IBlobOperations
                     Error.New(ErrorCodes.CannotGetBlobClient, ErrorMessages.CannotGetBlobClient)
             );
 
-    private static Aff<Response<BlobContentInfo>>UploadContent(
+    private static Aff<Response<BlobContentInfo>> UploadContent(
         BlobClient blobClient,
         string content
     ) =>
-        AffMaybe<Response<BlobContentInfo>>(
+        from op in AffMaybe<Response<BlobContentInfo>>(
                 async () => await blobClient.UploadAsync(BinaryData.FromString(content), true)
             )
-            .MapFail(
-                error => Error.New(ErrorCodes.CannotUpload, ErrorMessages.CannotUpload, error)
-            );
+            .MapFail(error => Error.New(ErrorCodes.CannotUpload, ErrorMessages.CannotUpload, error))
+        from response in op.GetRawResponse().IsError
+            ? FailAff<Response<BlobContentInfo>>(
+                Error.New(ErrorCodes.UploadFailResponse, ErrorMessages.UploadFailResponse)
+            )
+            : SuccessAff(op)
+        select response;
 }

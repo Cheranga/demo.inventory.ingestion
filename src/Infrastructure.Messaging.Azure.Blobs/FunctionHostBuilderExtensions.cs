@@ -1,4 +1,5 @@
-﻿using Azure.Identity;
+﻿using System.Diagnostics.CodeAnalysis;
+using Azure.Identity;
 using Azure.Storage.Blobs;
 using Infrastructure.Messaging.Azure.Blobs.Runtimes;
 using Microsoft.Extensions.Azure;
@@ -6,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Messaging.Azure.Blobs;
 
+[ExcludeFromCodeCoverage]
 public static class FunctionHostBuilderExtensions
 {
     public static IServiceCollection RegisterBlobsWithManagedIdentity(

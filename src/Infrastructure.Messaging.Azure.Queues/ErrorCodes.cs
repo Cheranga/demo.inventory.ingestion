@@ -10,6 +10,7 @@ public class ErrorCodes
     public const int UnableToPublishToQueue = 502;
     public const int UnableToPublishWithDefaultMessageSettings = 503;
     public const int UnableToPublishWithProvidedMessageSettings = 504;
+    public const int PublishFailResponse = 505;
 }
 
 [ExcludeFromCodeCoverage(Justification = "no specific logic to test")]
@@ -24,4 +25,6 @@ public class ErrorMessages
 
     public const string UnableToPublishWithProvidedMessageSettings =
         "unable to publish message to the queue with provided message settings";
+
+    public const string PublishFailResponse = "publish to queue operation returned unsuccessful response";
 }

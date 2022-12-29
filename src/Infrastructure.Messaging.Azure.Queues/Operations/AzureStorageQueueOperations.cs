@@ -1,7 +1,6 @@
 ﻿using Azure;
 using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
-using Infrastructure.Messaging.Azure.Queues.Exceptions;
 using Infrastructure.Messaging.Azure.Queues.Settings;
 using LanguageExt;
 using LanguageExt.Common;
@@ -23,17 +22,7 @@ internal class AzureStorageQueueOperations : IQueueOperations
             from qc in GetQueueClient(sc, operation.Queue)
             from op in PublishMessage(qc, operation.MessageContentFunc, operation.Settings)
             select op
-        ).Map(
-            response =>
-                response.GetRawResponse().IsError
-                    ? throw new MessagePublishException(
-                        Error.New(
-                            ErrorCodes.UnableToPublishToQueue,
-                            response.GetRawResponse().ReasonPhrase
-                        )
-                    )
-                    : unit
-        );
+        ).Map(_ => unit);
 
     private static Eff<QueueServiceClient> GetQueueServiceClient(
         IAzureClientFactory<QueueServiceClient> factory,
@@ -88,5 +77,10 @@ internal class AzureStorageQueueOperations : IQueueOperations
                             ErrorMessages.UnableToPublishWithProvidedMessageSettings
                         )
                 )
-        select op;
+        from response in op.GetRawResponse().IsError
+            ? FailAff<Response<SendReceipt>>(
+                Error.New(ErrorCodes.PublishFailResponse, ErrorMessages.PublishFailResponse)
+            )
+            : SuccessAff<Response<SendReceipt>>(op)
+        select response;
 }

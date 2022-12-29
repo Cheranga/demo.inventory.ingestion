@@ -5,7 +5,6 @@ using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
 using FluentAssertions;
 using Infrastructure.Messaging.Azure.Queues;
-using Infrastructure.Messaging.Azure.Queues.Exceptions;
 using Infrastructure.Messaging.Azure.Queues.Operations;
 using Infrastructure.Messaging.Azure.Queues.Settings;
 using Microsoft.Extensions.Azure;
@@ -14,17 +13,17 @@ using static BunsenBurner.Aaa;
 
 namespace Demo.Inventory.Ingestion.Tests.Infrastructure.Queues;
 
-public class DummySendReceiptResponse : Response<SendReceipt>
+public class DummySendReceiptResponse<T> : Response<T>
 {
     private readonly Response _response;
 
     private DummySendReceiptResponse(Response response) => _response = response;
 
-    public override SendReceipt Value { get; }
+    public override T Value { get; }
 
     public override Response GetRawResponse() => _response;
 
-    public static DummySendReceiptResponse New(Response response) => new(response);
+    public static DummySendReceiptResponse<T> New(Response response) => new(response);
 }
 
 public class DummyResponse : Response
@@ -42,6 +41,8 @@ public class DummyResponse : Response
     public override Stream? ContentStream { get; set; }
     public override string ClientRequestId { get; set; }
 
+    public override bool IsError => !string.IsNullOrEmpty(ReasonPhrase);
+
     public override void Dispose() { }
 
     protected override bool TryGetHeader(string name, out string? value)
@@ -57,8 +58,6 @@ public class DummyResponse : Response
     }
 
     protected override bool ContainsHeader(string name) => true;
-
-    public override bool IsError => !string.IsNullOrEmpty(ReasonPhrase);
 
     protected override IEnumerable<HttpHeader> EnumerateHeaders() => Array.Empty<HttpHeader>();
 
@@ -317,7 +316,9 @@ public class AzureStorageQueueOperationsTests
                             )
                     )
                     .ReturnsAsync(
-                        DummySendReceiptResponse.New(DummyResponse.New(HttpStatusCode.Accepted))
+                        DummySendReceiptResponse<SendReceipt>.New(
+                            DummyResponse.New(HttpStatusCode.Accepted)
+                        )
                     );
 
                 var mockedQueueServiceClient = new Mock<QueueServiceClient>();
@@ -391,7 +392,9 @@ public class AzureStorageQueueOperationsTests
                             )
                     )
                     .ReturnsAsync(
-                        DummySendReceiptResponse.New(DummyResponse.New(HttpStatusCode.Unauthorized, "unauthorized"))
+                        DummySendReceiptResponse<SendReceipt>.New(
+                            DummyResponse.New(HttpStatusCode.Unauthorized, "unauthorized")
+                        )
                     );
 
                 var mockedQueueServiceClient = new Mock<QueueServiceClient>();
@@ -448,8 +451,8 @@ public class AzureStorageQueueOperationsTests
                     fin.IsFail.Should().BeTrue();
                     fin.IfFail(error =>
                     {
-                        error.ToException().Should().BeOfType<MessagePublishException>();
-                        (error.ToException() as MessagePublishException).Error.Code.Should().Be(ErrorCodes.UnableToPublishToQueue);
+                        error.Code.Should().Be(ErrorCodes.PublishFailResponse);
+                        error.Message.Should().Be(ErrorMessages.PublishFailResponse);
                     });
                 }
             );

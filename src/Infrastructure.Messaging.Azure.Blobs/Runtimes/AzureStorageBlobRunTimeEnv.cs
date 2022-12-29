@@ -1,8 +1,10 @@
-﻿using Azure.Storage.Blobs;
+﻿using System.Diagnostics.CodeAnalysis;
+using Azure.Storage.Blobs;
 using Microsoft.Extensions.Azure;
 
 namespace Infrastructure.Messaging.Azure.Blobs.Runtimes;
 
+[ExcludeFromCodeCoverage]
 public class AzureStorageBlobRunTimeEnv
 {
     private AzureStorageBlobRunTimeEnv(IAzureClientFactory<BlobServiceClient> factory,
