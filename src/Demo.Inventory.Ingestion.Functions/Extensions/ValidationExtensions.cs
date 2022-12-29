@@ -2,11 +2,46 @@
 using Demo.Inventory.Ingestion.Domain;
 using FluentValidation;
 using FluentValidation.Results;
+using Infrastructure.Messaging.Azure.Queues;
 using LanguageExt;
+using LanguageExt.Common;
 using Microsoft.Extensions.Logging;
 using static LanguageExt.Prelude;
 
 namespace Demo.Inventory.Ingestion.Functions.Extensions;
+
+public record InvalidDataError : Error
+{
+    public ValidationException ValidationException { get; }
+
+    private InvalidDataError(
+        ValidationException validationException,
+        int errorCode,
+        string errorMessage
+    )
+    {
+        ValidationException = validationException;
+        Message = errorMessage;
+        Code = errorCode;
+    }
+
+    public override bool Is<E>() => ValidationException is E;
+
+    public override ErrorException ToErrorException() =>
+        new ExceptionalException(ValidationException);
+
+    public override string Message { get; }
+    public override bool IsExceptional => true;
+    public override bool IsExpected => false;
+
+    public override int Code { get; }
+
+    public static InvalidDataError New(
+        ValidationResult validationResult,
+        int errorCode,
+        string errorMessage
+    ) => new(new ValidationException(validationResult.Errors), errorCode, errorMessage);
+}
 
 public static class ValidationExtensions
 {
@@ -16,17 +51,11 @@ public static class ValidationExtensions
         ILogger logger,
         CancellationToken token
     ) where T : ITrackable =>
-        from validationResult in Aff(async () =>
-        {
-            var validationResult = await validator.ValidateAsync(data, token);
-            if (validationResult.IsValid)
-            {
-                logger.LogInformation("{CorrelationId} valid data {@Data}", data.CorrelationId, data);
-                return validationResult;
-            }
-
-            logger.LogInformation("{CorrelationId} invalid data {@Data}", data.CorrelationId, data);
-            throw new ValidationException(validationResult.Errors);
-        })
+        from op in AffMaybe<ValidationResult>(
+            async () => await validator.ValidateAsync(data, token)
+        )
+        from validationResult in op.IsValid
+            ? SuccessAff(op)
+            : FailAff<ValidationResult>(InvalidDataError.New(op, 400, "invalid input"))
         select validationResult;
 }

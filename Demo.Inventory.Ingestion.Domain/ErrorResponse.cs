@@ -1,7 +1,9 @@
-﻿using FluentValidation.Results;
+﻿using System.Diagnostics.CodeAnalysis;
+using FluentValidation.Results;
 
 namespace Demo.Inventory.Ingestion.Domain;
 
+[ExcludeFromCodeCoverage]
 public class ErrorResponse
 {
     public int ErrorCode { get; }

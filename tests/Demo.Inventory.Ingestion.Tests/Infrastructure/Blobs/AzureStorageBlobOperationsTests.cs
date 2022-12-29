@@ -257,6 +257,7 @@ public static class AzureStorageBlobOperationsTests
     {
         await Arrange(() =>
             {
+                
                 var blobClient = new Mock<BlobClient>();
                 blobClient
                     .Setup(

@@ -15,10 +15,7 @@ public class InventoryChangesHandler : IInventoryChangesHandler
 {
     private readonly ILogger<InventoryChangesHandler> _logger;
 
-    public InventoryChangesHandler(ILogger<InventoryChangesHandler> logger)
-    {
-        _logger = logger;
-    }
+    public InventoryChangesHandler(ILogger<InventoryChangesHandler> logger) => _logger = logger;
 
     public async ValueTask<Either<ErrorResponse, Unit>> Execute<TRunTime>(
         TRunTime runTime,
@@ -45,7 +42,7 @@ public class InventoryChangesHandler : IInventoryChangesHandler
                     "{CorrelationId} inventory changes accepted",
                     request.CorrelationId
                 );
-                return Right(unit);
+                return Either<ErrorResponse, Unit>.Right(unit);
             },
             error =>
             {
@@ -55,15 +52,22 @@ public class InventoryChangesHandler : IInventoryChangesHandler
                     request.CorrelationId,
                     error.Code
                 );
-                return Left<ErrorResponse, Unit>(
-                    error.ToException() is ValidationException
-                        ? ErrorResponse.New(
-                            ErrorCodes.InvalidData,
-                            ErrorMessages.InvalidData,
-                            ((ValidationException)error.ToException()).Errors
+
+                return error switch
+                {
+                    InvalidDataError invalidDataError
+                        => Either<ErrorResponse, Unit>.Left(
+                            ErrorResponse.New(
+                                ErrorCodes.InvalidData,
+                                ErrorMessages.InvalidData,
+                                invalidDataError.ValidationException.Errors
+                            )
+                        ),
+                    _
+                        => Either<ErrorResponse, Unit>.Left(
+                            ErrorResponse.New(error.Code, error.Message)
                         )
-                        : ErrorResponse.New(error.Code, error.Message)
-                );
+                };
             }
         );
 }
