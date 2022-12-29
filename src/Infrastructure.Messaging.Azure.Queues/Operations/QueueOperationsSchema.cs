@@ -19,7 +19,7 @@ public static class QueueOperationsSchema<TRunTime>
             queue,
             messageContentFunc,
             MessageSettings.DefaultSettings
-        )
+        ).MapFail(error=> QueueOperationError.New(error.Code, error.Message, error))
         select op;
 
     public static Aff<TRunTime, Unit> PublishUsingSettings(
@@ -32,6 +32,6 @@ public static class QueueOperationsSchema<TRunTime>
         from rto in default(TRunTime).QueueOperations
         from op in rto.Publish(
             new MessageOperation(correlationId, category, queue, settings, messageContentFunc)
-        )
+        ).MapFail(error=>QueueOperationError.New(error.Code, error.Message, error))
         select op;
 }

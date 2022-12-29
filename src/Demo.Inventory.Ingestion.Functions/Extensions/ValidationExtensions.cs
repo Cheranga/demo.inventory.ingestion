@@ -48,12 +48,15 @@ public static class ValidationExtensions
     public static Aff<ValidationResult> ValidateAff<T>(
         this IValidator<T> validator,
         T data,
-        ILogger logger,
         CancellationToken token
     ) where T : ITrackable =>
         from op in AffMaybe<ValidationResult>(
-            async () => await validator.ValidateAsync(data, token)
-        )
+                async () => await validator.ValidateAsync(data, token)
+            )
+            .MapFail(
+                error =>
+                    QueueOperationError.New(ErrorCodes.InternalServerError, "invalid data", error)
+            )
         from validationResult in op.IsValid
             ? SuccessAff(op)
             : FailAff<ValidationResult>(InvalidDataError.New(op, 400, "invalid input"))

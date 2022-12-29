@@ -27,7 +27,6 @@ public class Startup : FunctionsStartup
         RegisterSettings(builder.Services, configuration);
         RegisterBlobServices(builder, configuration);
         RegisterQueueServices(builder, configuration);
-        RegisterCustomServices(builder.Services);
         RegisterLogging(builder.Services);
         RegisterValidator(builder.Services);
     }
@@ -139,10 +138,7 @@ public class Startup : FunctionsStartup
         var isLocal = string.Equals(environment, "local", StringComparison.OrdinalIgnoreCase);
         return isLocal;
     }
-
-    private static void RegisterCustomServices(IServiceCollection services) =>
-        services.AddSingleton<IInventoryChangesHandler, InventoryChangesHandler>();
-
+    
     private static void RegisterLogging(IServiceCollection services) =>
         services.AddLogging(builder =>
         {

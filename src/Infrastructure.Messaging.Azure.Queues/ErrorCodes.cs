@@ -11,6 +11,7 @@ public class ErrorCodes
     public const int UnableToPublishWithDefaultMessageSettings = 503;
     public const int UnableToPublishWithProvidedMessageSettings = 504;
     public const int PublishFailResponse = 505;
+    public const int InternalServerError = 506;
 }
 
 [ExcludeFromCodeCoverage(Justification = "no specific logic to test")]
@@ -27,4 +28,5 @@ public class ErrorMessages
         "unable to publish message to the queue with provided message settings";
 
     public const string PublishFailResponse = "publish to queue operation returned unsuccessful response";
+    public const string InternalServerError = "internal server error occurred";
 }
