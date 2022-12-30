@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Demo.Inventory.Ingestion.Domain;
 using Demo.Inventory.Ingestion.Functions.Extensions;
 using FluentValidation;
@@ -11,7 +10,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Unit = LanguageExt.Unit;
 
 namespace Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
 
@@ -61,10 +59,11 @@ public class AcceptInventoryChangesFunction
                 error.ErrorCode switch
                 {
                     ErrorCodes.InvalidData => new BadRequestObjectResult(error),
-                    _ => new ObjectResult(error)
-                    {
-                        StatusCode = (int)HttpStatusCode.InternalServerError
-                    }
+                    _
+                        => new ObjectResult(error)
+                        {
+                            StatusCode = (int)HttpStatusCode.InternalServerError
+                        }
                 }
         );
 }

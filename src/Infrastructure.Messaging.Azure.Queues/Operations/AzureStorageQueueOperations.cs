@@ -1,9 +1,7 @@
 ﻿using Azure;
 using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
-using Infrastructure.Messaging.Azure.Queues.Settings;
 using LanguageExt;
-using LanguageExt.Common;
 using Microsoft.Extensions.Azure;
 using static LanguageExt.Prelude;
 
@@ -18,69 +16,113 @@ internal class AzureStorageQueueOperations : IQueueOperations
 
     public Aff<Unit> Publish(MessageOperation operation) =>
         (
-            from sc in GetQueueServiceClient(_factory, operation.Category)
-            from qc in GetQueueClient(sc, operation.Queue)
-            from op in PublishMessage(qc, operation.MessageContentFunc, operation.Settings)
+            from sc in GetQueueServiceClient(_factory, operation)
+            from qc in GetQueueClient(sc, operation)
+            from op in PublishMessage(qc, operation)
             select op
         ).Map(_ => unit);
 
     private static Eff<QueueServiceClient> GetQueueServiceClient(
         IAzureClientFactory<QueueServiceClient> factory,
-        string name
+        MessageOperation operation
     ) =>
-        EffMaybe<QueueServiceClient>(() => factory.CreateClient(name))
+        EffMaybe<QueueServiceClient>(() => factory.CreateClient(operation.Category))
             .MapFail(
-                _ =>
-                    Error.New(
+                error =>
+                    QueueOperationError.New(
                         ErrorCodes.QueueServiceClientNotFound,
-                        ErrorMessages.QueueServiceClientNotFound
+                        ErrorMessages.QueueServiceClientNotFound,
+                        operation.Category,
+                        operation.Queue,
+                        error.ToException()
                     )
             );
 
-    private static Eff<QueueClient> GetQueueClient(
-        QueueServiceClient serviceclient,
-        string queue
+    private static Aff<QueueClient> GetQueueClient(
+        QueueServiceClient serviceClient,
+        MessageOperation operation
     ) =>
-        EffMaybe<QueueClient>(() => serviceclient.GetQueueClient(queue))
+        from qc in Eff(() => serviceClient.GetQueueClient(operation.Queue))
             .MapFail(
-                _ => Error.New(ErrorCodes.QueueClientNotFound, ErrorMessages.QueueClientNotFound)
-            );
+                error =>
+                    QueueOperationError.New(
+                        ErrorCodes.InternalServerError,
+                        ErrorMessages.InternalServerError,
+                        operation.Category,
+                        operation.Queue,
+                        error.ToException()
+                    )
+            )
+        from response in AffMaybe<Response<QueueProperties>>(
+                async () => await qc.GetPropertiesAsync()
+            )
+            .MapFail(
+                error =>
+                    QueueOperationError.New(
+                        ErrorCodes.InternalServerError,
+                        ErrorMessages.InternalServerError,
+                        operation.Category,
+                        operation.Queue,
+                        error.ToException()
+                    )
+            )
+        from op in response.GetRawResponse().IsError
+            ? FailAff<QueueClient>(
+                QueueOperationError.New(
+                    ErrorCodes.QueueClientNotFound,
+                    ErrorMessages.QueueClientNotFound,
+                    operation.Category,
+                    operation.Queue
+                )
+            )
+            : SuccessAff(qc)
+        select op;
 
     private static Aff<Response<SendReceipt>> PublishMessage(
         QueueClient client,
-        Func<string> messageContentFunc,
-        MessageSettings settings
+        MessageOperation operation
     ) =>
-        from op in settings.IsDefaultSettings()
+        from op in operation.Settings.IsDefaultSettings()
             ? AffMaybe<Response<SendReceipt>>(
-                    async () => await client.SendMessageAsync(messageContentFunc())
+                    async () => await client.SendMessageAsync(operation.MessageContentFunc())
                 )
                 .MapFail(
-                    _ =>
-                        Error.New(
+                    error =>
+                        QueueOperationError.New(
                             ErrorCodes.UnableToPublishWithDefaultMessageSettings,
-                            ErrorMessages.UnableToPublishWithDefaultMessageSettings
+                            ErrorMessages.UnableToPublishWithDefaultMessageSettings,
+                            operation.Category,
+                            operation.Queue,
+                            error.ToException()
                         )
                 )
             : AffMaybe<Response<SendReceipt>>(
                     async () =>
                         await client.SendMessageAsync(
-                            messageContentFunc(),
-                            settings.Visibility,
-                            settings.TimeToLive
+                            operation.MessageContentFunc(),
+                            operation.Settings.Visibility,
+                            operation.Settings.TimeToLive
                         )
                 )
                 .MapFail(
-                    _ =>
-                        Error.New(
+                    error =>
+                        QueueOperationError.New(
                             ErrorCodes.UnableToPublishWithProvidedMessageSettings,
-                            ErrorMessages.UnableToPublishWithProvidedMessageSettings
+                            ErrorMessages.UnableToPublishWithProvidedMessageSettings,
+                            operation.Category,
+                            operation.Queue,
+                            error.ToException()
                         )
                 )
         from response in op.GetRawResponse().IsError
             ? FailAff<Response<SendReceipt>>(
-                Error.New(ErrorCodes.PublishFailResponse, ErrorMessages.PublishFailResponse)
+                QueueOperationError.New(
+                    ErrorCodes.PublishFailResponse,
+                    ErrorMessages.PublishFailResponse,
+                    operation.Category,
+                    operation.Queue
+                )
             )
-            : SuccessAff<Response<SendReceipt>>(op)
+            : SuccessAff(op)
         select response;
 }

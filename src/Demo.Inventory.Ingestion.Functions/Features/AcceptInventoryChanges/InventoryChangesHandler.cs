@@ -4,7 +4,6 @@ using Demo.Inventory.Ingestion.Domain;
 using Demo.Inventory.Ingestion.Functions.Extensions;
 using FluentValidation;
 using FluentValidation.Results;
-using Infrastructure.Messaging.Azure.Queues;
 using Infrastructure.Messaging.Azure.Queues.Operations;
 using LanguageExt;
 using LanguageExt.Common;
@@ -53,7 +52,10 @@ public static class InventoryChangesHandler
                     ErrorMessages.CannotPublishToQueue,
                     new[]
                     {
-                        new ValidationFailure("", queueOperationError.Message)
+                        new ValidationFailure(
+                            queueOperationError.Code.ToString(),
+                            queueOperationError.Message
+                        )
                         {
                             ErrorCode = queueOperationError.Code.ToString()
                         }

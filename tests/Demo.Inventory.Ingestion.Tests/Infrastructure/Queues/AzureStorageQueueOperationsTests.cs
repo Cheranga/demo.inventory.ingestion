@@ -112,10 +112,18 @@ public class AzureStorageQueueOperationsTests
     public async Task QueueDoesNotExistMustFail() =>
         await Arrange(() =>
             {
+                var mockedQueueClient = new Mock<QueueClient>();
+                mockedQueueClient
+                    .Setup(x => x.GetPropertiesAsync(It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(
+                        DummySendReceiptResponse<QueueProperties>.New(
+                            DummyResponse.New(HttpStatusCode.NotFound,"queue not found")
+                        )
+                    );
                 var mockedQueueServiceClient = new Mock<QueueServiceClient>();
                 mockedQueueServiceClient
                     .Setup(x => x.GetQueueClient(It.IsAny<string>()))
-                    .Throws(new Exception("some error"));
+                    .Returns(mockedQueueClient.Object);
 
                 var factory = new Mock<IAzureClientFactory<QueueServiceClient>>();
                 factory
@@ -157,6 +165,8 @@ public class AzureStorageQueueOperationsTests
         await Arrange(() =>
             {
                 var mockedQueueClient = new Mock<QueueClient>();
+                mockedQueueClient.Setup(x => x.GetPropertiesAsync(It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(DummySendReceiptResponse<QueueProperties>.New(DummyResponse.New(HttpStatusCode.OK)));
                 mockedQueueClient
                     .Setup(x => x.SendMessageAsync(It.IsAny<string>()))
                     .Throws(new Exception("unauthorized access"));
@@ -224,6 +234,8 @@ public class AzureStorageQueueOperationsTests
         await Arrange(() =>
             {
                 var mockedQueueClient = new Mock<QueueClient>();
+                mockedQueueClient.Setup(x => x.GetPropertiesAsync(It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(DummySendReceiptResponse<QueueProperties>.New(DummyResponse.New(HttpStatusCode.OK)));
                 mockedQueueClient
                     .Setup(
                         x =>
@@ -305,6 +317,8 @@ public class AzureStorageQueueOperationsTests
         await Arrange(() =>
             {
                 var mockedQueueClient = new Mock<QueueClient>();
+                mockedQueueClient.Setup(x => x.GetPropertiesAsync(It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(DummySendReceiptResponse<QueueProperties>.New(DummyResponse.New(HttpStatusCode.OK)));
                 mockedQueueClient
                     .Setup(
                         x =>
@@ -381,6 +395,8 @@ public class AzureStorageQueueOperationsTests
         await Arrange(() =>
             {
                 var mockedQueueClient = new Mock<QueueClient>();
+                mockedQueueClient.Setup(x => x.GetPropertiesAsync(It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(DummySendReceiptResponse<QueueProperties>.New(DummyResponse.New(HttpStatusCode.OK)));
                 mockedQueueClient
                     .Setup(
                         x =>
