@@ -11,8 +11,7 @@ public record QueueOperationError : Error
     private QueueOperationError(
         int errorCode,
         string errorMessage,
-        string category,
-        string queue,
+        MessageOperation operation,
         Exception? exception = null
     )
         : base(
@@ -23,13 +22,11 @@ public record QueueOperationError : Error
     {
         Code = errorCode;
         Message = errorMessage;
-        Category = category;
-        Queue = queue;
-        _exception = new QueueOperationException(category, queue, exception);
+        Operation = operation;
+        _exception = new QueueOperationException(operation, exception);
     }
 
-    public string Category { get; }
-    public string Queue { get; }
+    private MessageOperation Operation { get; }
 
     public override int Code { get; }
     public override string Message { get; }
@@ -44,8 +41,7 @@ public record QueueOperationError : Error
     public static QueueOperationError New(
         int errorCode,
         string errorMessage,
-        string category,
-        string queue,
+        MessageOperation operation,
         Exception? exception = null
-    ) => new(errorCode, errorMessage, category, queue, exception);
+    ) => new(errorCode, errorMessage, operation, exception);
 }

@@ -16,5 +16,7 @@ public struct TestFileOperations : IFileOperations
             ? _files[filePath].AsValueTask()
             : throw new FileNotFoundException($"{filePath} not found");
 
+    public ValueTask<string> ReadContent(string filePath) => ReadAllText(filePath);
+
     public static TestFileOperations New(IDictionary<string, string> files) => new(files);
 }

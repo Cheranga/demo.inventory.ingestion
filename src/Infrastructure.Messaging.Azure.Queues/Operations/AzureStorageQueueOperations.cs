@@ -32,8 +32,7 @@ internal class AzureStorageQueueOperations : IQueueOperations
                     QueueOperationError.New(
                         ErrorCodes.QueueServiceClientNotFound,
                         ErrorMessages.QueueServiceClientNotFound,
-                        operation.Category,
-                        operation.Queue,
+                        operation,
                         error.ToException()
                     )
             );
@@ -42,42 +41,20 @@ internal class AzureStorageQueueOperations : IQueueOperations
         QueueServiceClient serviceClient,
         MessageOperation operation
     ) =>
-        from qc in Eff(() => serviceClient.GetQueueClient(operation.Queue))
-            .MapFail(
-                error =>
-                    QueueOperationError.New(
-                        ErrorCodes.InternalServerError,
-                        ErrorMessages.InternalServerError,
-                        operation.Category,
-                        operation.Queue,
-                        error.ToException()
-                    )
-            )
-        from response in AffMaybe<Response<QueueProperties>>(
-                async () => await qc.GetPropertiesAsync()
-            )
-            .MapFail(
-                error =>
-                    QueueOperationError.New(
-                        ErrorCodes.InternalServerError,
-                        ErrorMessages.InternalServerError,
-                        operation.Category,
-                        operation.Queue,
-                        error.ToException()
-                    )
-            )
-        from op in response.GetRawResponse().IsError
-            ? FailAff<QueueClient>(
+        (
+            from qc in Eff(() => serviceClient.GetQueueClient(operation.Queue))
+            from _ in AffMaybe<Response<QueueProperties>>(async () => await qc.GetPropertiesAsync())
+            select qc
+        ).MapFail(
+            error =>
                 QueueOperationError.New(
                     ErrorCodes.QueueClientNotFound,
                     ErrorMessages.QueueClientNotFound,
-                    operation.Category,
-                    operation.Queue
+                    operation,
+                    error.ToException()
                 )
-            )
-            : SuccessAff(qc)
-        select op;
-
+        );
+    
     private static Aff<Response<SendReceipt>> PublishMessage(
         QueueClient client,
         MessageOperation operation
@@ -91,8 +68,7 @@ internal class AzureStorageQueueOperations : IQueueOperations
                         QueueOperationError.New(
                             ErrorCodes.UnableToPublishWithDefaultMessageSettings,
                             ErrorMessages.UnableToPublishWithDefaultMessageSettings,
-                            operation.Category,
-                            operation.Queue,
+                            operation,
                             error.ToException()
                         )
                 )
@@ -109,8 +85,7 @@ internal class AzureStorageQueueOperations : IQueueOperations
                         QueueOperationError.New(
                             ErrorCodes.UnableToPublishWithProvidedMessageSettings,
                             ErrorMessages.UnableToPublishWithProvidedMessageSettings,
-                            operation.Category,
-                            operation.Queue,
+                            operation,
                             error.ToException()
                         )
                 )
@@ -119,8 +94,7 @@ internal class AzureStorageQueueOperations : IQueueOperations
                 QueueOperationError.New(
                     ErrorCodes.PublishFailResponse,
                     ErrorMessages.PublishFailResponse,
-                    operation.Category,
-                    operation.Queue
+                    operation
                 )
             )
             : SuccessAff(op)

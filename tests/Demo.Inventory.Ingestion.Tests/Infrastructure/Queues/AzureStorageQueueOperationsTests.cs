@@ -115,11 +115,7 @@ public class AzureStorageQueueOperationsTests
                 var mockedQueueClient = new Mock<QueueClient>();
                 mockedQueueClient
                     .Setup(x => x.GetPropertiesAsync(It.IsAny<CancellationToken>()))
-                    .ReturnsAsync(
-                        DummySendReceiptResponse<QueueProperties>.New(
-                            DummyResponse.New(HttpStatusCode.NotFound,"queue not found")
-                        )
-                    );
+                    .ThrowsAsync(new Exception("queue not found"));
                 var mockedQueueServiceClient = new Mock<QueueServiceClient>();
                 mockedQueueServiceClient
                     .Setup(x => x.GetQueueClient(It.IsAny<string>()))

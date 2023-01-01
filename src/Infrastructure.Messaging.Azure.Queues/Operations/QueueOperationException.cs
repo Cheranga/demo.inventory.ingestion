@@ -5,13 +5,11 @@ namespace Infrastructure.Messaging.Azure.Queues.Operations;
 [ExcludeFromCodeCoverage]
 public class QueueOperationException : Exception
 {
-    public QueueOperationException(string category, string queue, Exception? exception)
+    public QueueOperationException(MessageOperation operation, Exception? exception)
         : base("queue operation error", exception)
     {
-        Category = category;
-        Queue = queue;
+        Operation = operation;
     }
 
-    public string Category { get; }
-    public string Queue { get; }
+    public MessageOperation Operation { get; }
 }
