@@ -39,44 +39,44 @@ public class AzureStorageBlobOperations : IBlobOperations
 
     private static Aff<List<TData>> GetRecords<TData, TDataMap>(BlobClient client)
         where TDataMap : ClassMap<TData> =>
-        (
-            from stream in use(
-                new MemoryStream(),
-                async st =>
-                {
-                    await client.DownloadToAsync(st);
-                    st.Position = 0;
-                    return st;
-                }
-            )
-            let items = use(
-                new StreamReader(stream),
-                sr =>
-                    use(
-                        () =>
-                        {
-                            var csvReader = new CsvReader(sr, CultureInfo.InvariantCulture);
-                            csvReader.Context.RegisterClassMap<TDataMap>();
-                            return csvReader;
-                        },
-                        csvr => csvr.GetRecords<TData>().ToList()
-                    )
-            )
-            select items
-        ).ToAff();
+        // (
+        //     from stream in use(
+        //         new MemoryStream(),
+        //         async st =>
+        //         {
+        //             await client.DownloadToAsync(st);
+        //             st.Position = 0;
+        //             return st;
+        //         }
+        //     )
+        //     let items = use(
+        //         new StreamReader(stream),
+        //         sr =>
+        //             use(
+        //                 () =>
+        //                 {
+        //                     var csvReader = new CsvReader(sr, CultureInfo.InvariantCulture);
+        //                     csvReader.Context.RegisterClassMap<TDataMap>();
+        //                     return csvReader;
+        //                 },
+        //                 csvr => csvr.GetRecords<TData>().ToList()
+        //             )
+        //     )
+        //     select items
+        // ).ToAff();
 
-    // from response in Aff(async () =>
-    // {
-    //     using var stream = new MemoryStream();
-    //     await blobClient.DownloadToAsync(stream);
-    //     stream.Position = 0;
-    //
-    //     using var streamReader = new StreamReader(stream);
-    //     using var csvReader = new CsvReader(streamReader, CultureInfo.InvariantCulture);
-    //     csvReader.Context.RegisterClassMap<TDataMap>();
-    //     return csvReader.GetRecords<TData>().ToList();
-    // })
-    // select response;
+    from response in Aff(async () =>
+    {
+        using var stream = new MemoryStream();
+        await client.DownloadToAsync(stream);
+        stream.Position = 0;
+    
+        using var streamReader = new StreamReader(stream);
+        using var csvReader = new CsvReader(streamReader, CultureInfo.InvariantCulture);
+        csvReader.Context.RegisterClassMap<TDataMap>();
+        return csvReader.GetRecords<TData>().ToList();
+    })
+    select response;
 
     public static AzureStorageBlobOperations New(IAzureClientFactory<BlobServiceClient> factory) =>
         new(factory);
