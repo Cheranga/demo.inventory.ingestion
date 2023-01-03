@@ -1,15 +1,18 @@
-﻿using System.Net;
+﻿using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Demo.Inventory.Ingestion.Domain;
 using Demo.Inventory.Ingestion.Functions.Extensions;
 using FluentValidation;
+using FluentValidation.Results;
 using Infrastructure.Messaging.Azure.Queues.Runtimes;
 using LanguageExt;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
+using static LanguageExt.Prelude;
 
 namespace Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
 
@@ -39,11 +42,17 @@ public class AcceptInventoryChangesFunction
         )]
             HttpRequest request
     )
-    {
+    {       
         var addOrderRequest = await request.ToModelAsync<AcceptInventoryChangeRequest>();
+        if (addOrderRequest.IsLeft)
+        {
+            return ToResponse(
+                Either<ErrorResponse, Unit>.Left(addOrderRequest.LeftToSeq().First())
+            );
+        }
         var operation = await InventoryChangesHandler.Execute(
             _runTime,
-            addOrderRequest,
+            addOrderRequest.RightToSeq().First(),
             _validator,
             _settings,
             CancellationToken.None

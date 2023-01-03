@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Demo.Inventory.Ingestion.Functions;
 using Demo.Inventory.Ingestion.Functions.Extensions;
 using Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
@@ -18,6 +19,7 @@ using Serilog.Events;
 
 namespace Demo.Inventory.Ingestion.Functions;
 
+[ExcludeFromCodeCoverage]
 public class Startup : FunctionsStartup
 {
     public override void Configure(IFunctionsHostBuilder builder)

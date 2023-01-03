@@ -1,9 +1,4 @@
-﻿using System.Globalization;
-using Azure.Storage.Blobs;
-using CsvHelper;
-using CsvHelper.Configuration;
-using LanguageExt;
-using static LanguageExt.Prelude;
+﻿using LanguageExt;
 
 namespace Demo.Inventory.Ingestion.Tests.Infrastructure.FileIO;
 

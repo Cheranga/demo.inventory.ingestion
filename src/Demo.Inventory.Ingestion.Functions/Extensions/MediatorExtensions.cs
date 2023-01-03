@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using LanguageExt;
 using MediatR;
@@ -6,7 +7,7 @@ using static LanguageExt.Prelude;
 namespace Demo.Inventory.Ingestion.Functions.Extensions;
 
 
-
+[ExcludeFromCodeCoverage]
 public static class MediatorExtensions
 {
     public static Aff<TResponse> SendAff<TRequest, TResponse>(

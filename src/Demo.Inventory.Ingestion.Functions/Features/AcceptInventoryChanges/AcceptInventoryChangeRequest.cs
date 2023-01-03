@@ -1,8 +1,6 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Demo.Inventory.Ingestion.Domain;
 using FluentValidation;
-using FluentValidation.Validators;
 using LanguageExt;
 using MediatR;
 using Unit = LanguageExt.Unit;

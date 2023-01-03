@@ -1,7 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using System.Diagnostics.CodeAnalysis;
+using Newtonsoft.Json;
 
 namespace Demo.Inventory.Ingestion.Functions.Extensions;
 
+[ExcludeFromCodeCoverage]
 public static class JsonExtensions
 {
     public static string ToJson<T>(this T data)=>

@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using Demo.Inventory.Ingestion.Domain;
 using FluentValidation;
 using FluentValidation.Results;
@@ -9,6 +10,7 @@ using static LanguageExt.Prelude;
 
 namespace Demo.Inventory.Ingestion.Functions.Extensions;
 
+[ExcludeFromCodeCoverage]
 public record InvalidDataError : Error
 {
     private InvalidDataError(
@@ -42,6 +44,7 @@ public record InvalidDataError : Error
     ) => new(new ValidationException(validationResult.Errors), errorCode, errorMessage);
 }
 
+[ExcludeFromCodeCoverage]
 public static class ValidationExtensions
 {
     public static Aff<ValidationResult> ValidateAff<T>(

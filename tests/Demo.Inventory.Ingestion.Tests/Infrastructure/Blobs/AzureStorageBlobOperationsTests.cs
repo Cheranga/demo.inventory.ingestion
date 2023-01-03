@@ -2,6 +2,7 @@
 using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Demo.Inventory.Ingestion.Functions.Features.ReadInventoryChanges;
 using Demo.Inventory.Ingestion.Tests.Infrastructure.Queues;
 using FluentAssertions;
 using Infrastructure.Messaging.Azure.Blobs;
@@ -257,7 +258,6 @@ public static class AzureStorageBlobOperationsTests
     {
         await Arrange(() =>
             {
-                
                 var blobClient = new Mock<BlobClient>();
                 blobClient
                     .Setup(
@@ -331,6 +331,137 @@ public static class AzureStorageBlobOperationsTests
                         error.Code.Should().Be(ErrorCodes.UploadFailResponse);
                         error.Message.Should().Be(ErrorMessages.UploadFailResponse);
                     });
+                }
+            );
+    }
+
+    [Fact]
+    public static async Task UnderValidConditionsBlobUploadMustPass()
+    {
+        await Arrange(() =>
+            {
+                var blobClient = new Mock<BlobClient>();
+                blobClient
+                    .Setup(
+                        x =>
+                            x.UploadAsync(
+                                It.IsAny<BinaryData>(),
+                                It.IsAny<bool>(),
+                                It.IsAny<CancellationToken>()
+                            )
+                    )
+                    .ReturnsAsync(
+                        () =>
+                            DummySendReceiptResponse<BlobContentInfo>.New(
+                                DummyResponse.New(HttpStatusCode.OK)
+                            )
+                    );
+
+                var blobContainerClient = new Mock<BlobContainerClient>();
+                blobContainerClient
+                    .Setup(x => x.GetBlobClient(It.IsAny<string>()))
+                    .Returns(blobClient.Object);
+
+                var blobServiceClient = new Mock<BlobServiceClient>();
+                blobServiceClient
+                    .Setup(x => x.GetBlobContainerClient(It.IsAny<string>()))
+                    .Returns(blobContainerClient.Object);
+
+                var factory = new Mock<IAzureClientFactory<BlobServiceClient>>();
+                factory
+                    .Setup(x => x.CreateClient(It.IsAny<string>()))
+                    .Returns(blobServiceClient.Object);
+
+                var operations = AzureStorageBlobOperations.New(factory.Object);
+                return (factory, blobServiceClient, blobContainerClient, blobClient, operations);
+            })
+            .Act(
+                async tuple =>
+                    await tuple.operations
+                        .Upload(
+                            new FileUploadRequest(
+                                "666",
+                                "inventory",
+                                "inventory",
+                                "blah.csv",
+                                "Yo!"
+                            )
+                        )
+                        .Run()
+            )
+            .Assert(
+                (tuple, fin) =>
+                {
+                    fin.IsSucc.Should().BeTrue();
+                    tuple.factory.Verify(x => x.CreateClient("inventory"), Times.Once);
+                    tuple.blobServiceClient.Verify(
+                        x => x.GetBlobContainerClient("inventory"),
+                        Times.Once
+                    );
+                    tuple.blobContainerClient.Verify(x => x.GetBlobClient("blah.csv"), Times.Once);
+                    tuple.blobClient.Verify(
+                        x =>
+                            x.UploadAsync(
+                                It.IsAny<BinaryData>(),
+                                It.IsAny<bool>(),
+                                It.IsAny<CancellationToken>()
+                            ),
+                        Times.Once
+                    );
+                }
+            );
+    }
+
+    [Fact]
+    public static async Task UnderValidConditionsReadingCSVBlobMustPass()
+    {
+        await Arrange(() =>
+            {
+                var blobClient = new Mock<BlobClient>();
+                // blobClient
+                //     .Setup(
+                //         x =>
+                //             x.GetCsvDataFromBlob<Domain.Inventory, InventoryMap>()
+                //     )
+                //     .Returns(SuccessAff(new List<Domain.Inventory>()));
+
+                var blobContainerClient = new Mock<BlobContainerClient>();
+                blobContainerClient
+                    .Setup(x => x.GetBlobClient(It.IsAny<string>()))
+                    .Returns(blobClient.Object);
+
+                var blobServiceClient = new Mock<BlobServiceClient>();
+                blobServiceClient
+                    .Setup(x => x.GetBlobContainerClient(It.IsAny<string>()))
+                    .Returns(blobContainerClient.Object);
+
+                var factory = new Mock<IAzureClientFactory<BlobServiceClient>>();
+                factory
+                    .Setup(x => x.CreateClient(It.IsAny<string>()))
+                    .Returns(blobServiceClient.Object);
+
+                var operations = AzureStorageBlobOperations.New(factory.Object);
+                return (factory, blobServiceClient, blobContainerClient, blobClient, operations);
+            })
+            .Act(
+                async tuple =>
+                    await tuple.operations
+                        .ReadDataFromCsv<Domain.Inventory, InventoryMap>(
+                            new ReadFileRequest("666", "inventory", "inventory", "blah.csv")
+                        )
+                        .Run()
+            )
+            .Assert(
+                (tuple, fin) =>
+                {
+                    fin.IsSucc.Should().BeTrue();
+                    tuple.factory.Verify(x => x.CreateClient("inventory"), Times.Once);
+                    tuple.blobServiceClient.Verify(
+                        x => x.GetBlobContainerClient("inventory"),
+                        Times.Once
+                    );
+                    tuple.blobContainerClient.Verify(x => x.GetBlobClient("blah.csv"), Times.Once);
+                    fin.IfSucc(inventories => inventories.Should().BeEmpty());
                 }
             );
     }

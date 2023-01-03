@@ -1,8 +1,10 @@
-﻿using LanguageExt;
+﻿using System.Diagnostics.CodeAnalysis;
+using LanguageExt;
 using static LanguageExt.Prelude;
 
 namespace Infrastructure.Messaging.Azure.Queues.Operations;
 
+[ExcludeFromCodeCoverage]
 internal class TestQueueOperations : IQueueOperations
 {
     public Queue<string> Queue { get; }

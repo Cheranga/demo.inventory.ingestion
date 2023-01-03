@@ -1,9 +1,8 @@
-﻿using System.Globalization;
-using Azure;
+﻿using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using CsvHelper;
 using CsvHelper.Configuration;
+using Infrastructure.Messaging.Azure.Blobs.Extensions;
 using Infrastructure.Messaging.Azure.Blobs.Requests;
 using LanguageExt;
 using Microsoft.Extensions.Azure;
@@ -11,7 +10,7 @@ using static LanguageExt.Prelude;
 
 namespace Infrastructure.Messaging.Azure.Blobs.Operations;
 
-public class AzureStorageBlobOperations : IBlobOperations
+internal class AzureStorageBlobOperations : IBlobOperations
 {
     private readonly IAzureClientFactory<BlobServiceClient> _factory;
 
@@ -29,81 +28,41 @@ public class AzureStorageBlobOperations : IBlobOperations
 
     public Aff<List<TData>> ReadDataFromCsv<TData, TDataMap>(ReadFileRequest request)
         where TDataMap : ClassMap<TData> =>
-        from blobServiceClient in Eff(() => _factory.CreateClient(request.Category))
+        from blobServiceClient in GetBlobServiceClient(_factory, request)
         from blobContainerClient in Eff(
             () => blobServiceClient.GetBlobContainerClient(request.Container)
         )
         from blobClient in Eff(() => blobContainerClient.GetBlobClient(request.FileName))
-        from response in GetRecords<TData, TDataMap>(blobClient)
+        from response in blobClient.GetCsvDataFromBlob<TData, TDataMap>()
         select response;
-
-    private static Aff<List<TData>> GetRecords<TData, TDataMap>(BlobClient client)
-        where TDataMap : ClassMap<TData> =>
-        // (
-        //     from stream in use(
-        //         new MemoryStream(),
-        //         async st =>
-        //         {
-        //             await client.DownloadToAsync(st);
-        //             st.Position = 0;
-        //             return st;
-        //         }
-        //     )
-        //     let items = use(
-        //         new StreamReader(stream),
-        //         sr =>
-        //             use(
-        //                 () =>
-        //                 {
-        //                     var csvReader = new CsvReader(sr, CultureInfo.InvariantCulture);
-        //                     csvReader.Context.RegisterClassMap<TDataMap>();
-        //                     return csvReader;
-        //                 },
-        //                 csvr => csvr.GetRecords<TData>().ToList()
-        //             )
-        //     )
-        //     select items
-        // ).ToAff();
-
-    from response in Aff(async () =>
-    {
-        using var stream = new MemoryStream();
-        await client.DownloadToAsync(stream);
-        stream.Position = 0;
-    
-        using var streamReader = new StreamReader(stream);
-        using var csvReader = new CsvReader(streamReader, CultureInfo.InvariantCulture);
-        csvReader.Context.RegisterClassMap<TDataMap>();
-        return csvReader.GetRecords<TData>().ToList();
-    })
-    select response;
 
     public static AzureStorageBlobOperations New(IAzureClientFactory<BlobServiceClient> factory) =>
         new(factory);
 
-    private static Eff<BlobServiceClient> GetBlobServiceClient(
+    private static Eff<BlobServiceClient> GetBlobServiceClient<TBlobRequest>(
         IAzureClientFactory<BlobServiceClient> factory,
-        FileUploadRequest request
-    ) =>
+        TBlobRequest request
+    ) where TBlobRequest:IBlobRequest
+        =>
         EffMaybe<BlobServiceClient>(() => factory.CreateClient(request.Category))
             .MapFail(
                 error =>
-                    FileUploadError.New(
+                    BlobOperationError<TBlobRequest>.New(
                         ErrorCodes.UnregisteredBlobServiceClient,
                         ErrorMessages.UnregisteredBlobServiceClient,
-                        request,
-                        error.ToException()
+                        exception: error.ToException()
                     )
             );
 
-    private static Eff<BlobContainerClient> GetBlobContainerClient(
+    private static Eff<BlobContainerClient> GetBlobContainerClient<TBlobRequest>(
         BlobServiceClient serviceClient,
-        FileUploadRequest request
-    ) =>
+        TBlobRequest request
+    ) where TBlobRequest:IBlobRequest
+        =>
         EffMaybe<BlobContainerClient>(() => serviceClient.GetBlobContainerClient(request.Container))
             .MapFail(
                 error =>
-                    FileUploadError.New(
+                    BlobOperationError<TBlobRequest>.New(
                         ErrorCodes.CannotGetBlobContainerClient,
                         ErrorMessages.CannotGetBlobContainerClient,
                         request,
@@ -111,14 +70,15 @@ public class AzureStorageBlobOperations : IBlobOperations
                     )
             );
 
-    private static Eff<BlobClient> GetBlobClient(
+    private static Eff<BlobClient> GetBlobClient<TBlobRequest>(
         BlobContainerClient containerClient,
-        FileUploadRequest request
-    ) =>
+        TBlobRequest request
+    ) where TBlobRequest:IBlobRequest
+        =>
         EffMaybe<BlobClient>(() => containerClient.GetBlobClient(request.FileName))
             .MapFail(
                 error =>
-                    FileUploadError.New(
+                    BlobOperationError<TBlobRequest>.New(
                         ErrorCodes.CannotGetBlobClient,
                         ErrorMessages.CannotGetBlobClient,
                         request,
@@ -136,7 +96,7 @@ public class AzureStorageBlobOperations : IBlobOperations
             )
             .MapFail(
                 error =>
-                    FileUploadError.New(
+                    BlobOperationError<FileUploadRequest>.New(
                         ErrorCodes.CannotUpload,
                         ErrorMessages.CannotUpload,
                         request,
@@ -145,7 +105,7 @@ public class AzureStorageBlobOperations : IBlobOperations
             )
         from response in op.GetRawResponse().IsError
             ? FailAff<Response<BlobContentInfo>>(
-                FileUploadError.New(
+                BlobOperationError<FileUploadRequest>.New(
                     ErrorCodes.UploadFailResponse,
                     ErrorMessages.UploadFailResponse,
                     request
