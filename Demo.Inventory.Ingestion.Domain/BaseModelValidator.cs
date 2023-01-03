@@ -1,8 +1,10 @@
-﻿using FluentValidation;
+﻿using System.Diagnostics.CodeAnalysis;
+using FluentValidation;
 using FluentValidation.Results;
 
-namespace Demo.Inventory.Ingestion.Functions.Core;
+namespace Demo.Inventory.Ingestion.Domain;
 
+[ExcludeFromCodeCoverage]
 public class BaseModelValidator<T> : AbstractValidator<T>
 {
     public BaseModelValidator()

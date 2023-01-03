@@ -29,6 +29,7 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Remove="Extensions\BaseRequestHandler.cs" />
+        <Compile Remove="Features\AcceptInventoryChanges\AcceptInventoryChangeRequestHandler.cs" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\..\Demo.Inventory.Ingestion.Domain\Demo.Inventory.Ingestion.Domain.csproj" />

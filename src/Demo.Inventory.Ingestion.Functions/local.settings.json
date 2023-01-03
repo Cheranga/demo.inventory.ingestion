@@ -1,0 +1,17 @@
+﻿{
+  "IsEncrypted": false,
+  "Values": {
+    "Environment": "local",
+    "AcceptInventorySettings__Account": "UseDevelopmentStorage=true",
+    "AcceptInventorySettings__Category": "Inventory",
+    "AcceptInventorySettings__Queue": "inventory-changes",
+    "SourceInventorySettings__Account": "UseDevelopmentStorage=true",
+    "SourceInventorySettings__Category": "Inventory",
+    "SourceInventorySettings__Container": "demo-event",
+    "DestinationInventorySettings__Account": "UseDevelopmentStorage=true",
+    "DestinationInventorySettings__Category": "Inventory",
+    "DestinationInventorySettings__Container": "demo-inventory",
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet"
+  }
+}

@@ -1,10 +1,11 @@
-﻿using Demo.Inventory.Ingestion.Functions;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using Demo.Inventory.Ingestion.Functions;
 using Demo.Inventory.Ingestion.Functions.Extensions;
 using Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
 using FluentValidation;
 using Infrastructure.Messaging.Azure.Blobs;
 using Infrastructure.Messaging.Azure.Queues;
-using MediatR;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Azure.WebJobs.Host.Bindings;
@@ -12,24 +13,28 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Serilog;
+using Serilog.Events;
 
 [assembly: FunctionsStartup(typeof(Startup))]
 
 namespace Demo.Inventory.Ingestion.Functions;
 
+[ExcludeFromCodeCoverage]
 public class Startup : FunctionsStartup
 {
     public override void Configure(IFunctionsHostBuilder builder)
     {
         var configuration = GetConfiguration(builder);
 
-        RegisterSettings(builder, configuration);
-        RegisterAzureClients(builder, configuration);
-        RegisterMessaging(builder);
-
-        builder.Services.AddValidatorsFromAssembly(typeof(Startup).Assembly);
-        builder.Services.AddMediatR(typeof(Startup).Assembly);
+        RegisterSettings(builder.Services, configuration);
+        RegisterBlobServices(builder, configuration);
+        RegisterQueueServices(builder, configuration);
+        RegisterLogging(builder.Services);
+        RegisterValidator(builder.Services);
     }
+
+    private static void RegisterValidator(IServiceCollection services) =>
+        services.AddValidatorsFromAssembly(typeof(Startup).Assembly);
 
     protected virtual IConfiguration GetConfiguration(IFunctionsHostBuilder builder)
     {
@@ -45,37 +50,29 @@ public class Startup : FunctionsStartup
             .Build();
     }
 
-    private static void RegisterSettings(
-        IFunctionsHostBuilder builder,
-        IConfiguration configuration
-    )
+    private static void RegisterSettings(IServiceCollection services, IConfiguration configuration)
     {
-        builder.Services.RegisterFromConfiguration<AcceptInventorySettings>(
+        services.RegisterFromConfiguration<AcceptInventorySettings>(
             configuration,
             ServiceLifetime.Singleton
         );
-        
-        builder.Services.RegisterFromConfiguration<SourceInventorySettings>(
+
+        services.RegisterFromConfiguration<SourceInventorySettings>(
             configuration,
             ServiceLifetime.Singleton
         );
-        
-        builder.Services.RegisterFromConfiguration<DestinationInventorySettings>(
+
+        services.RegisterFromConfiguration<DestinationInventorySettings>(
             configuration,
             ServiceLifetime.Singleton
         );
     }
-        
 
-    private static void RegisterAzureClients(
+    private static void RegisterBlobServices(
         IFunctionsHostBuilder builder,
         IConfiguration configuration
     )
     {
-        var addOrderSettings = configuration
-            .GetSection(nameof(AcceptInventorySettings))
-            .Get<AcceptInventorySettings>();
-
         var sourceInventorySettings = configuration
             .GetSection(nameof(SourceInventorySettings))
             .Get<SourceInventorySettings>();
@@ -84,37 +81,80 @@ public class Startup : FunctionsStartup
             .GetSection(nameof(DestinationInventorySettings))
             .Get<DestinationInventorySettings>();
 
-        builder.RegisterQueueServiceClient(
-            configuration,
-            addOrderSettings.Account,
-            addOrderSettings.Category
-        );
-        builder.RegisterBlobServiceClient(
-            configuration,
-            sourceInventorySettings.Account,
-            sourceInventorySettings.Category
-        );
-        builder.RegisterBlobServiceClient(
-            configuration,
-            destinationInventorySettings.Account,
-            destinationInventorySettings.Category
-        );
+        var isLocal = IsLocal(configuration);
+
+        if (isLocal)
+        {
+            builder.Services
+                .RegisterLiveBlobRunTime()
+                .RegisterBlobsWithConnectionString(
+                    (sourceInventorySettings.Account, sourceInventorySettings.Category)
+                )
+                .RegisterBlobsWithConnectionString(
+                    (destinationInventorySettings.Account, destinationInventorySettings.Category)
+                );
+            return;
+        }
+
+        builder.Services
+            .RegisterLiveBlobRunTime()
+            .RegisterBlobsWithManagedIdentity(
+                (sourceInventorySettings.Account, sourceInventorySettings.Category)
+            )
+            .RegisterBlobsWithManagedIdentity(
+                (destinationInventorySettings.Account, destinationInventorySettings.Category)
+            );
     }
 
-    private static void RegisterMessaging(IFunctionsHostBuilder builder)
+    private static void RegisterQueueServices(
+        IFunctionsHostBuilder builder,
+        IConfiguration configuration
+    )
     {
-        var services = builder.Services;
-        services.AddSingleton<IMessagePublisher, AzureQueueStorageMessagePublisher>();
+        var addOrderSettings = configuration
+            .GetSection(nameof(AcceptInventorySettings))
+            .Get<AcceptInventorySettings>();
+
+        var isLocal = IsLocal(configuration);
+
+        if (isLocal)
+        {
+            builder.Services
+                .RegisterLiveQueueRunTime()
+                .RegisterQueuesWithConnectionString(
+                    (addOrderSettings.Account, addOrderSettings.Category)
+                );
+            return;
+        }
+
+        builder.Services
+            .RegisterLiveQueueRunTime()
+            .RegisterQueuesWithManagedIdentity(
+                (addOrderSettings.Account, addOrderSettings.Category)
+            );
     }
 
-    private static void RegisterLogging(IServiceCollection services)
+    private static bool IsLocal(IConfiguration configuration)
     {
+        var environment = configuration.GetValue<string>("Environment");
+        var isLocal = string.Equals(environment, "local", StringComparison.OrdinalIgnoreCase);
+        return isLocal;
+    }
+    
+    private static void RegisterLogging(IServiceCollection services) =>
         services.AddLogging(builder =>
         {
-            var logger = new LoggerConfiguration().WriteTo
-                .ColoredConsole(
-                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
-                )
+            var logger = new LoggerConfiguration().MinimumLevel
+                .Information()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                .MinimumLevel.Override("System", LogEventLevel.Warning)
+                .MinimumLevel.Override("Worker", LogEventLevel.Warning)
+                .MinimumLevel.Override("Host", LogEventLevel.Warning)
+                .MinimumLevel.Override("Function", LogEventLevel.Warning)
+                .MinimumLevel.Override("Azure", LogEventLevel.Warning)
+                .MinimumLevel.Override("DurableTask", LogEventLevel.Warning)
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
                 .WriteTo.ApplicationInsights(
                     TelemetryConfiguration.CreateDefault(),
                     TelemetryConverter.Traces
@@ -123,5 +163,4 @@ public class Startup : FunctionsStartup
 
             builder.AddSerilog(logger);
         });
-    }
 }
