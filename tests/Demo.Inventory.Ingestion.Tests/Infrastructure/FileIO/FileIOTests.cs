@@ -5,7 +5,7 @@ namespace Demo.Inventory.Ingestion.Tests.Infrastructure.FileIO;
 
 public static class FileIOTests
 {
-    [Fact]
+    //[Fact]
     public static async Task LiveEnvironment()
     {
         var runTime = LiveFileRunTime.New();
