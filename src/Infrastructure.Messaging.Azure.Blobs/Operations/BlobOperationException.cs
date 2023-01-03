@@ -6,11 +6,11 @@ namespace Infrastructure.Messaging.Azure.Blobs.Operations;
 [ExcludeFromCodeCoverage]
 public class BlobOperationException<TData> : Exception where TData : IBlobRequest
 {
-    public TData? Data { get; }
+    public TData? BlobOperation { get; }
 
     public BlobOperationException(TData? data, string errorMessage, Exception? exception)
         : base(errorMessage, exception)
     {
-        Data = data;
+        BlobOperation = data;
     }
 }

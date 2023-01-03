@@ -14,7 +14,7 @@ namespace Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
 
 public static class InventoryChangesHandler
 {
-    public static async ValueTask<Either<ErrorResponse, Unit>> Execute<TRunTime>(
+    public static async ValueTask<Either<Error, Unit>> Execute<TRunTime>(
         TRunTime runTime,
         AcceptInventoryChangeRequest request,
         IValidator<AcceptInventoryChangeRequest> validator,
@@ -33,8 +33,8 @@ public static class InventoryChangesHandler
                 select __
             ).Run(runTime)
         ).Match(
-            _ => Right<ErrorResponse, Unit>(unit),
-            error => Left<ErrorResponse, Unit>(GetErrorResponse(error))
+            _ => Right<Error, Unit>(unit),
+            Left<Error, Unit>
         );
 
     private static ErrorResponse GetErrorResponse(Error error) =>

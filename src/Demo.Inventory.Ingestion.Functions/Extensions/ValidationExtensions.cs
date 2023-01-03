@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 using Demo.Inventory.Ingestion.Domain;
 using FluentValidation;
@@ -9,40 +11,6 @@ using LanguageExt.Common;
 using static LanguageExt.Prelude;
 
 namespace Demo.Inventory.Ingestion.Functions.Extensions;
-
-[ExcludeFromCodeCoverage]
-public record InvalidDataError : Error
-{
-    private InvalidDataError(
-        ValidationException validationException,
-        int errorCode,
-        string errorMessage
-    )
-    {
-        ValidationException = validationException;
-        Message = errorMessage;
-        Code = errorCode;
-    }
-
-    public ValidationException ValidationException { get; }
-
-    public override string Message { get; }
-    public override bool IsExceptional => true;
-    public override bool IsExpected => false;
-
-    public override int Code { get; }
-
-    public override bool Is<E>() => ValidationException is E;
-
-    public override ErrorException ToErrorException() =>
-        new ExceptionalException(ValidationException);
-
-    public static InvalidDataError New(
-        ValidationResult validationResult,
-        int errorCode,
-        string errorMessage
-    ) => new(new ValidationException(validationResult.Errors), errorCode, errorMessage);
-}
 
 [ExcludeFromCodeCoverage]
 public static class ValidationExtensions

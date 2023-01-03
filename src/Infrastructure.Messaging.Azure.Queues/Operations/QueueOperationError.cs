@@ -38,10 +38,11 @@ public record QueueOperationError : Error
     public override ErrorException ToErrorException() =>
         ErrorException.New(Code, Message, ErrorException.New(_exception));
 
-    public static QueueOperationError New(
+    public static Error New(
         int errorCode,
         string errorMessage,
         MessageOperation operation,
         Exception? exception = null
-    ) => new(errorCode, errorMessage, operation, exception);
+    ) => new QueueOperationError(errorCode, errorMessage, operation, exception);
+    
 }

@@ -1,8 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Demo.Inventory.Ingestion.Domain;
 using FluentValidation.Results;
-using Infrastructure.Messaging.Azure.Queues;
 using LanguageExt;
 using LanguageExt.Common;
 using Microsoft.AspNetCore.Http;
@@ -16,6 +14,31 @@ public static class HttpExtensions
 {
     private static readonly JsonSerializerSettings SerializerSettings =
         new() { Error = (_, args) => args.ErrorContext.Handled = true };
+
+    private static readonly Error EmptyRequestBody = InvalidDataError.New(
+        Seq1(new ValidationFailure("body", "empty request body")),
+        401,
+        "invalid request data"
+    );
+
+    private static readonly Error InvalidRequestBody = InvalidDataError.New(
+        Seq1(new ValidationFailure("body", "invalid request body")),
+        402,
+        "invalid request data"
+    );
+
+    public static async Task<Either<Error, TModel>> ToModel<TModel>(this HttpRequest request) =>
+        (
+            await (
+                from content in Aff(async () => await request.ReadAsStringAsync())
+                from _ in guard(!string.IsNullOrEmpty(content), EmptyRequestBody)
+                from data in EffMaybe<TModel>(() => JsonConvert.DeserializeObject<TModel>(content))
+                    .MapFail(_ => InvalidRequestBody)
+                select data
+            ).Run()
+        )
+            .ToEither()
+            .Match(Right<Error, TModel>, Left<Error, TModel>);
 
     public static async Task<Either<ErrorResponse, TModel>> ToModelAsync<TModel>(
         this HttpRequest request

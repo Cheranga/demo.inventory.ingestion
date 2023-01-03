@@ -6,8 +6,10 @@ using Demo.Inventory.Ingestion.Domain;
 using Demo.Inventory.Ingestion.Functions.Extensions;
 using FluentValidation;
 using FluentValidation.Results;
+using Infrastructure.Messaging.Azure.Queues.Operations;
 using Infrastructure.Messaging.Azure.Queues.Runtimes;
 using LanguageExt;
+using LanguageExt.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -42,13 +44,11 @@ public class AcceptInventoryChangesFunction
         )]
             HttpRequest request
     )
-    {       
-        var addOrderRequest = await request.ToModelAsync<AcceptInventoryChangeRequest>();
+    {
+        var addOrderRequest = await request.ToModel<AcceptInventoryChangeRequest>();
         if (addOrderRequest.IsLeft)
         {
-            return ToResponse(
-                Either<ErrorResponse, Unit>.Left(addOrderRequest.LeftToSeq().First())
-            );
+            return ToResponse(addOrderRequest);
         }
         var operation = await InventoryChangesHandler.Execute(
             _runTime,
@@ -61,13 +61,30 @@ public class AcceptInventoryChangesFunction
         return ToResponse(operation);
     }
 
-    private static IActionResult ToResponse(Either<ErrorResponse, Unit> operation) =>
+    private static IActionResult ToResponse<T>(Either<Error, T> operation) =>
         operation.Match<IActionResult>(
             _ => new AcceptedResult(),
             error =>
-                error.ErrorCode switch
+                error switch
                 {
-                    ErrorCodes.InvalidData => new BadRequestObjectResult(error),
+                    InvalidDataError invalidDataError
+                        => new BadRequestObjectResult(invalidDataError.ToErrorResponse),
+                    QueueOperationError queueError
+                        => new ObjectResult(
+                            ErrorResponse.New(
+                                401,
+                                "queue error",
+                                Seq1(
+                                    new ValidationFailure(
+                                        queueError.Code.ToString(),
+                                        queueError.Message
+                                    )
+                                )
+                            )
+                        )
+                        {
+                            StatusCode = (int)(HttpStatusCode.InternalServerError)
+                        },
                     _
                         => new ObjectResult(error)
                         {
