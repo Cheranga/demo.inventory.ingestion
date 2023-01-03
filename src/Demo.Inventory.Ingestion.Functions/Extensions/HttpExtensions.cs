@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Demo.Inventory.Ingestion.Domain;
+using Demo.Inventory.Ingestion.Functions.Features.AcceptInventoryChanges;
 using FluentValidation.Results;
 using LanguageExt;
 using LanguageExt.Common;
@@ -12,22 +13,21 @@ namespace Demo.Inventory.Ingestion.Functions.Extensions;
 
 public static class HttpExtensions
 {
-    private static readonly JsonSerializerSettings SerializerSettings =
-        new() { Error = (_, args) => args.ErrorContext.Handled = true };
-
     private static readonly Error EmptyRequestBody = InvalidDataError.New(
-        Seq1(new ValidationFailure("body", "empty request body")),
-        401,
-        "invalid request data"
+        Seq1(new ValidationFailure("body", ErrorMessages.EmptyRequestBody)),
+        ErrorCodes.EmptyRequestBody,
+        ErrorMessages.EmptyRequestBody
     );
 
     private static readonly Error InvalidRequestBody = InvalidDataError.New(
-        Seq1(new ValidationFailure("body", "invalid request body")),
-        402,
-        "invalid request data"
+        Seq1(new ValidationFailure("body", ErrorMessages.InvalidRequestBody)),
+        ErrorCodes.InvalidRequestBody,
+        ErrorMessages.InvalidRequestBody
     );
 
-    public static async Task<Either<Error, TModel>> ToModel<TModel>(this HttpRequest request) =>
+    public static async Task<Either<ErrorResponse, TModel>> ToModel<TModel>(
+        this HttpRequest request
+    ) =>
         (
             await (
                 from content in Aff(async () => await request.ReadAsStringAsync())
@@ -36,9 +36,10 @@ public static class HttpExtensions
                     .MapFail(_ => InvalidRequestBody)
                 select data
             ).Run()
-        )
-            .ToEither()
-            .Match(Right<Error, TModel>, Left<Error, TModel>);
+        ).Match(
+            Right<ErrorResponse, TModel>,
+            error => error.ToErrorResponse()
+        );
 
     public static async Task<Either<ErrorResponse, TModel>> ToModelAsync<TModel>(
         this HttpRequest request

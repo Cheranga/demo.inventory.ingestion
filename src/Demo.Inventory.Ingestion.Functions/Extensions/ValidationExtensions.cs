@@ -28,4 +28,13 @@ public static class ValidationExtensions
             ? SuccessAff(op)
             : FailAff<ValidationResult>(InvalidDataError.New(op, 400, "invalid input"))
         select validationResult;
+
+    public static ErrorResponse ToErrorResponse(this Error error) =>
+        ErrorResponse.New(
+            error.Code,
+            error.Message,
+            error
+                .AsEnumerable()
+                .Select(x => new ValidationFailure(error.Code.ToString(), error.Message))
+        );
 }
